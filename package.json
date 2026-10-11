@@ -1,0 +1,29 @@
+{
+  "name": "software-design-pj-1",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Object-oriented SVG CLI editor for Software Design PJ1",
+  "type": "module",
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "cli": "tsx src/bootstrap/main.ts",
+    "start": "node dist/bootstrap/main.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.11.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}
