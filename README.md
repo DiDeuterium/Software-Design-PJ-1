@@ -1,6 +1,6 @@
 # Software Design PJ1 — SVG CLI Editor
 
-TypeScript 面向对象 SVG 编辑器。当前完成工程骨架：启动入口、输入循环和开发工具链；图形、文档、历史及编辑命令尚未实现。
+TypeScript 面向对象 SVG 编辑器。当前完成工程骨架和图形领域模型：六种图形、属性校验、递归移动与缩放、深复制及 Visitor 协议；文档、历史及编辑命令尚未实现。
 
 架构与行为约定见 [doc/README.md](doc/README.md)，课程要求见 [phase_cli_1.md](phase_cli_1.md)。
 
@@ -43,11 +43,11 @@ npm run build
 
 也可执行 `npm run check` 连续完成上述三项，或用 `npm run test:watch` 进入测试监听。
 
-当前测试验证真实子进程的启动、EOF、注释与连续错误后的退出码。未来随各功能加入领域、应用和 SVG 读写测试。
+当前 4 个测试文件、96 项测试覆盖 CLI 子进程与图形领域模型，包括数值边界、属性白名单、嵌套容器操作、溢出失败原子性、父级归属和深复制。后续加入文档、应用与 SVG 读写测试。
 
 ## 目录
 
-- `src/domain`：图形、文档、工厂、遍历协议（当前为空目录占位）。
+- `src/domain`：已实现图形与遍历协议；文档及工厂待实现。
 - `src/application`：命令、历史、端口、会话（当前为空目录占位）。
 - `src/cli`：REPL 与命令分发边界。
 - `src/presentation`：展示（待实现）。
