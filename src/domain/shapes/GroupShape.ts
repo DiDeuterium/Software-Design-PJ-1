@@ -1,9 +1,10 @@
 import type { ShapeVisitor } from '../traversal/ShapeVisitor.js';
 import { Shape } from './Shape.js';
 import { ShapeMutation } from './ShapeMutation.js';
+import { treeChildren } from './TreeAccess.js';
 
 export class GroupShape extends Shape {
-  private readonly childrenValue: readonly Shape[];
+  private childrenValue: readonly Shape[];
 
   public constructor(id: string, children: readonly Shape[] = []) {
     super(id);
@@ -13,6 +14,13 @@ export class GroupShape extends Shape {
 
   public override get type(): string { return 'g'; }
   public override get children(): readonly Shape[] { return this.childrenValue; }
+
+  public override asGroup(): GroupShape { return this; }
+
+  /** @internal SvgDocument supplies a frozen, fully validated candidate list. */
+  public [treeChildren](children: readonly Shape[]): void {
+    this.childrenValue = children;
+  }
 
   protected override planMove(dx: number, dy: number): ShapeMutation {
     return ShapeMutation.combine(this.childrenValue.map(child => child.prepareMove(dx, dy)));

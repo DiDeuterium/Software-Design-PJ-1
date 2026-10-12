@@ -1,9 +1,12 @@
 import type { ShapeVisitor } from '../traversal/ShapeVisitor.js';
 import { ShapeMutation } from './ShapeMutation.js';
 import { ShapeValidation } from './ShapeValidation.js';
+import type { GroupShape } from './GroupShape.js';
+import { treeEdit, treeOwner } from './TreeAccess.js';
 
 export abstract class Shape {
   private static readonly owners = new WeakMap<Shape, Shape>();
+  private static readonly documents = new WeakMap<Shape, object>();
   private static readonly emptyChildren: readonly Shape[] = Object.freeze([]);
   private readonly idValue: string;
   private fillValue: string | undefined;
@@ -21,6 +24,19 @@ export abstract class Shape {
   public get strokeWidth(): number | undefined { return this.strokeWidthValue; }
   public get parent(): Shape | undefined { return Shape.owners.get(this); }
   public get children(): readonly Shape[] { return Shape.emptyChildren; }
+
+  public asGroup(): GroupShape | undefined { return undefined; }
+
+  /** @internal Called only by the document's validated structural commit. */
+  public [treeEdit](parent: Shape | undefined, document: object | undefined): void {
+    if (parent === undefined) Shape.owners.delete(this);
+    else Shape.owners.set(this, parent);
+    if (document === undefined) Shape.documents.delete(this);
+    else Shape.documents.set(this, document);
+  }
+
+  /** @internal Document ownership remains distinct from a group's parent. */
+  public [treeOwner](): object | undefined { return Shape.documents.get(this); }
 
   public move(dx: number, dy: number): void {
     this.prepareMove(dx, dy).apply();
@@ -67,6 +83,9 @@ export abstract class Shape {
       for (const child of shape.children) visit(child);
     };
     for (const child of children) {
+      if (child[treeOwner]() !== undefined) {
+        throw new Error(`shape already belongs to a document: ${child.id}`);
+      }
       if (child.parent !== undefined) {
         throw new Error(`shape already has a parent: ${child.id}`);
       }
