@@ -12,6 +12,6 @@ export abstract class EditCommand extends Command {
   public abstract apply(document: SvgDocument): CommandResult | Promise<CommandResult>;
 
   public describeUndo(result: CommandResult): CommandResult {
-    return new CommandResult(`undone: ${result.message}`);
+    return new CommandResult(result.undoMessage ?? `undone: ${result.message}`);
   }
 }
