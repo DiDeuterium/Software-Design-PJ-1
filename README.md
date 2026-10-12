@@ -1,6 +1,6 @@
 # Software Design PJ1 — SVG CLI Editor
 
-TypeScript 面向对象 SVG 编辑器。当前完成工程骨架、领域模型、命令历史与基础编辑命令：create/delete/move/scale/set，以及集中图形工厂。结构编辑命令、CLI 编辑接入和 SVG 读写尚未实现。
+TypeScript 面向对象 SVG 编辑器。当前完成工程骨架、领域模型、集中工厂、命令历史，以及全部十个编辑命令：create/delete/move/scale/set/group/ungroup/addto/front/back。CLI 编辑接入和 SVG 读写尚未实现。
 
 架构与行为约定见 [doc/README.md](doc/README.md)，课程要求见 [phase_cli_1.md](phase_cli_1.md)。
 
@@ -43,12 +43,12 @@ npm run build
 
 也可执行 `npm run check` 连续完成上述三项，或用 `npm run test:watch` 进入测试监听。
 
-当前 10 个测试文件、321 项测试覆盖 CLI 骨架、领域模型、应用机制和五个真实基础编辑命令，包括六种创建参数、父容器归属、成功反馈、精确撤销重做、失败时 redo 保留及异步顺序。基础命令在应用 API 上执行，CLI 分发仍未接入。后续加入结构命令与 SVG 读写测试。
+当前 11 个测试文件、363 项测试覆盖 CLI 骨架、领域模型、应用机制和全部十个编辑命令，包括创建归属、分组解组、同级排序、防循环、混合结构序列、精确撤销重做和失败时 redo 保留。命令在应用 API 上执行，CLI 分发仍未接入。后续加入 CLI 和 SVG 读写测试。
 
 ## 目录
 
 - `src/domain`：已实现图形、集中工厂、文档树管理、快照与遍历协议。
-- `src/application`：已实现命令基类、五个基础编辑命令、历史管理、会话与状态；文件及编解码端口待实现。
+- `src/application`：已实现命令基类、十个编辑命令、历史管理、会话与状态；文件及编解码端口待实现。
 - `src/cli`：REPL 与命令分发边界。
 - `src/presentation`：展示（待实现）。
 - `src/infrastructure`：SVG 与文件适配器（待实现）。
