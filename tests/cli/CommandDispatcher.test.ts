@@ -5,6 +5,8 @@ import { SvgDocument } from '../../src/domain/document/SvgDocument.js';
 import { TreeFormatter } from '../../src/presentation/TreeFormatter.js';
 import { ShowFormatter } from '../../src/presentation/ShowFormatter.js';
 import { HelpFormatter } from '../../src/presentation/HelpFormatter.js';
+import { LocalFileStore } from '../../src/infrastructure/filesystem/LocalFileStore.js';
+import { FastXmlSvgCodec } from '../../src/infrastructure/svg/FastXmlSvgCodec.js';
 
 describe('CLI command dispatch through a real session', () => {
   let session: EditorSession;
@@ -12,7 +14,8 @@ describe('CLI command dispatch through a real session', () => {
 
   beforeEach(() => {
     session = new EditorSession();
-    dispatcher = new CommandDispatcher(session, new TreeFormatter(), new ShowFormatter(), new HelpFormatter());
+    dispatcher = new CommandDispatcher(session, new TreeFormatter(), new ShowFormatter(), new HelpFormatter(),
+      new LocalFileStore(), new FastXmlSvgCodec());
   });
 
   it('supports help/comments before init; init uses independent width/height defaults', async () => {
@@ -112,7 +115,8 @@ describe('CLI command dispatch through a real session', () => {
 
   it('validates init atomically, clears old path only on success and preserves path on resize', async () => {
     session = new EditorSession(new SvgDocument(100, 200), 'original.svg');
-    dispatcher = new CommandDispatcher(session, new TreeFormatter(), new ShowFormatter(), new HelpFormatter());
+    dispatcher = new CommandDispatcher(session, new TreeFormatter(), new ShowFormatter(), new HelpFormatter(),
+      new LocalFileStore(), new FastXmlSvgCodec());
     await dispatcher.dispatch('create g g');
     await dispatcher.dispatch('undo');
     await expect(dispatcher.dispatch('init 0 999')).rejects.toThrow();
@@ -136,11 +140,10 @@ describe('CLI command dispatch through a real session', () => {
     expect([session.document?.size, session.undoCount, session.redoCount, session.historyBlocked]).toEqual([0, 0, 0, true]);
   });
 
-  it('identifies pending IO commands without pretending they succeeded', async () => {
+  it('reports missing read files and save paths without changing state', async () => {
     await dispatcher.dispatch('init');
-    for (const name of ['read', 'save']) {
-      await expect(dispatcher.dispatch(name + ' "中文 路径.svg"')).rejects.toThrow('command not implemented yet: ' + name);
-    }
+    await expect(dispatcher.dispatch('read "missing-dir/中文 路径.svg"')).rejects.toThrow('cannot read file: missing-dir/中文 路径.svg');
+    await expect(dispatcher.dispatch('save')).rejects.toThrow("no save path. use 'save <file.svg>' first");
     expect(session.path).toBeUndefined();
     expect(session.historyBlocked).toBe(true);
   });

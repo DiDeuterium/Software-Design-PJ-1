@@ -70,12 +70,12 @@ describe('presentation visitors', () => {
     expect(formatter.format(parent)).toBe('g#markers  parent=svg\n  children=1\n  fill=red');
   });
 
-  it('lists all commands while identifying pending persistence', () => {
+  it('lists all commands and save path behavior', () => {
     const help = new HelpFormatter().format();
     for (const name of ['init', 'read', 'save', 'canvas', 'create', 'delete', 'move', 'scale', 'set',
       'group', 'ungroup', 'addto', 'front', 'back', 'tree', 'show', 'help', 'undo', 'redo']) {
       expect(help).toContain(name);
     }
-    expect(help).toContain('pending SVG persistence phase');
+    expect(help).toContain('last read/save path');
   });
 });

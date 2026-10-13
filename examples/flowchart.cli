@@ -1,4 +1,4 @@
-# 两节点流程图：本阶段演示内存编辑，SVG 保存将在下一阶段接入
+# 两节点流程图：内存编辑回放；交互时可在最后执行 save flowchart.svg 保存结果
 init 800 600
 create g flowchart
 create g node1 in flowchart

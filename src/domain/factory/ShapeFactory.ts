@@ -10,19 +10,49 @@ import type { ShapeParameter } from './ShapeParameter.js';
 
 /** The sole shape-name dispatch point; future refactoring: provider registration. */
 export class ShapeFactory {
-  private readonly builders = new Map<string, (id: string, parameters: readonly ShapeParameter[]) => Shape>([
-    ['rect', this.createRect.bind(this)],
-    ['circle', this.createCircle.bind(this)],
-    ['ellipse', this.createEllipse.bind(this)],
-    ['line', this.createLine.bind(this)],
-    ['text', this.createText.bind(this)],
-    ['g', this.createGroup.bind(this)],
+  private readonly builders = new Map<string, {
+    build: (id: string, parameters: readonly ShapeParameter[], children?: readonly Shape[]) => Shape;
+    defaults: readonly ShapeParameter[];
+    acceptsText?: boolean;
+  }>([
+    ['rect', { build: this.createRect.bind(this), defaults: [0, 0, 0, 0] }],
+    ['circle', { build: this.createCircle.bind(this), defaults: [0, 0, 0] }],
+    ['ellipse', { build: this.createEllipse.bind(this), defaults: [0, 0, 0, 0] }],
+    ['line', { build: this.createLine.bind(this), defaults: [0, 0, 0, 0] }],
+    ['text', { build: this.createText.bind(this), defaults: [0, 0, ''], acceptsText: true }],
+    ['g', { build: this.createGroup.bind(this), defaults: [] }],
   ]);
 
   public create(type: string, id: string, parameters: readonly ShapeParameter[] = []): Shape {
     const build = this.builders.get(type);
     if (build === undefined) throw new Error(`unknown shape type: ${type} (is the plugin loaded?)`);
-    return build(id, parameters);
+    return build.build(id, parameters);
+  }
+
+  /** Shared name dispatch for SVG import; attribute rules remain polymorphic. */
+  public fromAttributes(type: string, id: string, attributes: ReadonlyMap<string, string>,
+    content: string, children: readonly Shape[]): Shape {
+    const entry = this.builders.get(type);
+    if (entry === undefined) throw new Error('unsupported svg element: ' + type);
+    const shape = entry.build(id, entry.defaults, children);
+    if (children.length > 0 && shape.asGroup() === undefined) {
+      throw new Error('invalid svg: child elements not allowed in ' + type);
+    }
+    if (entry.acceptsText === true) shape.set('text', content);
+    else if (content.trim().length > 0) throw new Error('invalid svg: unexpected text in ' + type);
+    for (const [name, value] of attributes) {
+      if (name === 'id') continue;
+      // SVG text is child content, never an attribute.
+      if (name === 'text') throw new Error('unsupported svg attribute: ' + name);
+      try { shape.set(name, value); }
+      catch (error: unknown) {
+        if (error instanceof Error && error.message.startsWith('unknown attribute:')) {
+          throw new Error('unsupported svg attribute: ' + name);
+        }
+        throw error;
+      }
+    }
+    return shape;
   }
 
   private arity(parameters: readonly ShapeParameter[], min: number, max: number, syntax: string): void {
@@ -71,8 +101,8 @@ export class ShapeFactory {
     return new TextShape(id, this.number(p, 0), this.number(p, 1), ShapeValidation.text(this.parameter(p, 2), 'text'));
   }
 
-  private createGroup(id: string, p: readonly ShapeParameter[]): GroupShape {
+  private createGroup(id: string, p: readonly ShapeParameter[], children: readonly Shape[] = []): GroupShape {
     this.arity(p, 0, 0, 'create g <id>');
-    return new GroupShape(id);
+    return new GroupShape(id, children);
   }
 }

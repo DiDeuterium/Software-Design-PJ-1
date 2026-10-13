@@ -10,6 +10,8 @@ import { CommandResult } from '../../src/application/commands/CommandResult.js';
 import { TreeFormatter } from '../../src/presentation/TreeFormatter.js';
 import { ShowFormatter } from '../../src/presentation/ShowFormatter.js';
 import { HelpFormatter } from '../../src/presentation/HelpFormatter.js';
+import { LocalFileStore } from '../../src/infrastructure/filesystem/LocalFileStore.js';
+import { FastXmlSvgCodec } from '../../src/infrastructure/svg/FastXmlSvgCodec.js';
 
 const projectRoot = fileURLToPath(new URL('../../', import.meta.url));
 const entry = fileURLToPath(new URL('../../src/bootstrap/main.ts', import.meta.url));
@@ -108,7 +110,8 @@ describe('CLI end-to-end scripts and asynchronous output', () => {
   });
 
   it('awaits results, renders warnings before messages, and reduces exceptions to one line', async () => {
-    const dispatcher = new CommandDispatcher(new EditorSession(), new TreeFormatter(), new ShowFormatter(), new HelpFormatter());
+    const dispatcher = new CommandDispatcher(new EditorSession(), new TreeFormatter(), new ShowFormatter(), new HelpFormatter(),
+      new LocalFileStore(), new FastXmlSvgCodec());
     const calls: string[] = [];
     vi.spyOn(dispatcher, 'dispatch').mockImplementation(async line => {
       calls.push(line);

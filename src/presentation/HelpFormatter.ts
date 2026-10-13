@@ -4,8 +4,8 @@ export class HelpFormatter {
       'Document:',
       '  init [w] [h]                 defaults: 800x600; omitted h: 600',
       '  canvas [w] [h]               query or resize; omitted h: current height',
-      '  read <file.svg>               pending SVG persistence phase',
-      '  save [file.svg]               pending SVG persistence phase',
+      '  read <file.svg>               replace document; remember path',
+      '  save [file.svg]               overwrite; default: last read/save path',
       'Edit:',
       '  create <type> <id> [params] [in <containerId>]',
       '    rect <id> <x> <y> <w> <h> [fill]',
@@ -26,7 +26,7 @@ export class HelpFormatter {
       '  tree [id] / show <id> / help / undo / redo',
       'Whole-line # comments only; colors such as #ffffff are values.',
       'Double-quoted arguments support escaped quotes and backslashes.',
-      'EOF or Ctrl+C exits. Successful init/resize blocks undo/redo until the next edit.',
+      'EOF or Ctrl+C exits. Successful init/read/save/resize blocks undo/redo until the next edit.',
     ].join('\n');
   }
 }

@@ -2,6 +2,10 @@ import type { Command } from '../application/commands/Command.js';
 import type { CommandResult } from '../application/commands/CommandResult.js';
 import type { EditorSession } from '../application/session/EditorSession.js';
 import type { TreeView, ShapeView, HelpView } from '../application/ports/Presentation.js';
+import type { FileStore } from '../application/ports/FileStore.js';
+import type { SvgCodec } from '../application/ports/SvgCodec.js';
+import { ReadCommand } from '../application/commands/ReadCommand.js';
+import { SaveCommand } from '../application/commands/SaveCommand.js';
 import { CreateCommand } from '../application/commands/CreateCommand.js';
 import { DeleteCommand } from '../application/commands/DeleteCommand.js';
 import { MoveCommand } from '../application/commands/MoveCommand.js';
@@ -27,7 +31,8 @@ export class CommandDispatcher {
   private readonly tokenizer = new Tokenizer();
   private readonly handlers: ReadonlyMap<string, (tokens: readonly Token[]) => Promise<CommandResult>>;
 
-  public constructor(session: EditorSession, tree: TreeView, show: ShapeView, help: HelpView) {
+  public constructor(session: EditorSession, tree: TreeView, show: ShapeView, help: HelpView,
+    files: FileStore, codec: SvgCodec) {
     this.session = session;
     this.handlers = new Map<string, (tokens: readonly Token[]) => Promise<CommandResult>>([
       ['init', t => this.command(t, 0, 2, 'init [w] [h]', a => new InitCommand(a[0], a[1]))],
@@ -48,8 +53,8 @@ export class CommandDispatcher {
       ['help', t => this.command(t, 0, 0, 'help', () => new HelpCommand(help))],
       ['undo', t => { this.arity(t, 0, 0, 'undo'); return this.session.undo(); }],
       ['redo', t => { this.arity(t, 0, 0, 'redo'); return this.session.redo(); }],
-      ['read', t => this.unavailable(t, 1, 1, 'read <file.svg>', 'read')],
-      ['save', t => this.unavailable(t, 0, 1, 'save [file.svg]', 'save')],
+      ['read', t => this.command(t, 1, 1, 'read <file.svg>', a => new ReadCommand(a[0]!, files, codec))],
+      ['save', t => this.command(t, 0, 1, 'save [file.svg]', a => new SaveCommand(a[0], files, codec))],
     ]);
   }
 
@@ -85,9 +90,4 @@ export class CommandDispatcher {
     }
   }
 
-  private async unavailable(tokens: readonly Token[], min: number, max: number,
-    syntax: string, name: string): Promise<CommandResult> {
-    this.arity(tokens, min, max, syntax);
-    throw new Error(`command not implemented yet: ${name}`);
-  }
 }
