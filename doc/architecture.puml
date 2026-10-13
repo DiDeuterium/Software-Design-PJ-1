@@ -8,6 +8,7 @@ component "presentation" as P
 package "application" {
   component "commands / history / session" as A
   interface "ports: FileStore / SvgCodec" as Ports
+  interface "ports: TreeView / ShapeView / HelpView" as Views
 }
 component "domain" as D
 component "infrastructure" as I
@@ -21,6 +22,9 @@ P --> D
 A --> D
 A --> Ports
 Ports --> D
+Views --> D
+A --> Views
+P ..|> Views : structural typing (no import)
 I ..|> Ports
 I --> D
 note bottom of D

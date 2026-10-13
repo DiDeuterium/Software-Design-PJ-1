@@ -3,7 +3,7 @@
 - 编写日期：2026-10-10。
 - 需求依据：[phase_cli_1.md](../phase_cli_1.md)。
 - 确认日期：2026-10-10；用户确认 D01 使用 `PJ 1` 作为仓库根目录，D02–D18 按原建议执行。
-- 当前阶段：工程骨架、领域模型、命令历史、集中工厂与十个编辑命令已完成并验证；CLI 编辑接入及 SVG 读写尚未实现。
+- 当前阶段：领域模型、应用历史、全部编辑命令与 CLI 解析/展示已完成并验证；init/canvas 已接入，SVG 文件读写待下一阶段实现。
 - 本文中的“需求”来自阶段文档；“方案”及第 5 节的“已采纳规则”是本次确认后的实施依据；替代方案仅保留为取舍记录。
 - 所有原有不确定事项集中在第 5 节，决策依据记录于第 7 节。D15 的依赖版本已在工程骨架阶段确定；D18 的实际截止时间仍需补充。
 
@@ -61,7 +61,7 @@ PJ 1/
 │   ├── application/
 │   │   ├── commands/         # Command 与每个具体命令类
 │   │   ├── history/          # HistoryManager、历史屏障
-│   │   ├── ports/            # FileStore、SvgCodec 接口
+│   │   ├── ports/            # 展示接口；后续 FileStore、SvgCodec 接口
 │   │   └── session/          # EditorSession：当前文档、路径、执行协调
 │   ├── cli/                 # Tokenizer、CommandDispatcher、Repl
 │   ├── presentation/        # TreeFormatter、ShowFormatter、HelpFormatter
@@ -79,7 +79,7 @@ PJ 1/
 └── tsconfig.json
 ```
 
-上述模块目录已建立，尚未实现的目录用 .gitkeep 保留。已有 CLI 骨架、领域模型与快照，以及 application 下的命令抽象、历史和会话；tests/cli、tests/domain、tests/application 存放对应测试。具体类名可以在实现时调整，但职责和依赖方向改变必须记录。
+上述模块目录已建立，尚未实现的目录用 .gitkeep 保留。已有 CLI 解析/分发/异步循环、领域模型与快照，以及应用命令、历史和会话；tests/cli、tests/domain、tests/application、tests/presentation 存放对应测试。具体类名可以在实现时调整，但职责和依赖方向改变必须记录。
 
 ### 2.2 架构图
 
@@ -96,6 +96,7 @@ component "presentation" as P
 package "application" {
   component "commands / history / session" as A
   interface "ports: FileStore / SvgCodec" as Ports
+  interface "ports: TreeView / ShapeView / HelpView" as Views
 }
 component "domain" as D
 component "infrastructure" as I
@@ -109,6 +110,9 @@ P --> D
 A --> D
 A --> Ports
 Ports --> D
+Views --> D
+A --> Views
+P ..|> Views : structural typing (no import)
 I ..|> Ports
 I --> D
 note bottom of D
@@ -192,7 +196,7 @@ REPL → Tokenizer → CommandDispatcher → EditorSession
 - 会话成功编辑及 undo/redo 使用快照替换图形实例；公开 document getter 返回独立副本，读者与保留草稿不能修改当前状态。应用层按 ID 重新查询，不长期保存可变图形引用。
 - `CommandResult` 封装并冻结成功摘要和警告，便于后续 CLI 展示。编辑命令可覆盖 describeUndo 给出具体恢复摘要；redo 复用已记录的结果，不重新执行操作。
 
-当前已加入十个编辑命令，全部通过 EditorSession 的候选执行与历史机制工作。CLI 仍使用占位分发器，输入解析与终端装配在后续 CLI 阶段完成。
+当前十个编辑命令均已通过 CLI 接入 EditorSession 的候选执行与历史机制。init 和 canvas 修改走 DocumentCommand，canvas 查询、tree/show/help 走 QueryCommand；undo/redo 调用会话的串行历史入口。
 
 基础编辑实现补充：
 
@@ -235,6 +239,16 @@ ShapeFactory 已实现唯一类型映射，集中管理六种构造方法、参�
 建议在领域层定义 `ShapeVisitor` 协议，各图形通过 `accept` 调用对应访问方法。`TreeFormatter`、`ShowFormatter`、SVG Writer 在各自模块实现该协议。
 
 这样展示和导出无须 `switch(tag)`，领域类也不依赖具体 XML 库或 CLI 字符串。取舍是新增图形类型可能需要扩展 Visitor 接口；本阶段只有六种固定类型，可接受这一成本。未来插件阶段应重新评估动态类型与 Visitor 的兼容方式，不宣称当前方案已实现“插件新增内核代码为零”。
+
+### 3.6 CLI 解析与查询展示（2026-10-13）
+
+- Tokenizer 逐字符解析，Token 封装值与是否带双引号。引号必须包围完整参数，参数之间以空白分隔；引号内支持 D06 的两种转义，引号外反斜杠按字面保留。空行与整行注释返回空 token 列表，不解析注释内的引号。
+- CommandDispatcher 用唯一命令表完成名称分发、通用参数数量检查与命令装配；create 只检查参数尾部未加引号的 `in <containerId>`，不把类型名/ID 或加引号的 `"in"` 当作子句。各类型参数数量和数值仍由集中 ShapeFactory 校验，不在 CLI 复制类型表。
+- Repl 等待每条异步命令完成，先输出警告再输出结果；异常压为单行并继续下一行，任何命令失败使最终退出码为 1。多行 tree/show/help 输出保留换行。EOF 前已读入的最后一行即使没有换行符也执行。
+- TreeFormatter 通过 Visitor 显示六种图形的几何及显式样式，用树枝连接符保留顺序和层级；支持空文档、整棵树、容器子树与单叶子。ShowFormatter 展示真实父级、完整几何字段、文本、组的直接子节点数量及自身显式样式。文本使用 JSON 引号转义，避免内容换行破坏结构；不把继承样式写成节点自身属性。
+- TreeCommand/ShowCommand/HelpCommand 只依赖应用层 TreeView/ShapeView/HelpView 结构接口，bootstrap 注入具体 Formatter。presentation 不导入 application，靠 TypeScript 结构类型满足接口，因此原依赖方向保持；查询使用会话副本，不进入历史或解除屏障。
+- 为使本阶段 CLI 可从空会话开始运行，将无文件 IO 的 InitCommand、ResizeCanvasCommand、CanvasQueryCommand 提前到步骤 7；read/save 留在步骤 8。本阶段 read/save 校验参数后返回 `command not implemented yet: <name>`，help 明确标记待实现，不改变文档或历史。
+- 细化可选画布参数：init 支持 0/1/2 个参数，省略的宽高分别取 800/600；canvas 无参数查询，给一个参数只改宽度并保留当前高度，给两个参数修改两维。尺寸校验仍走领域规则，成功修改（含尺寸相同）建立文档屏障。成功 init 清空默认路径，resize 保留路径；失败均保留原状态。
 
 ## 4. 状态、事务与变化点
 
@@ -309,6 +323,7 @@ D09 已确认本阶段拒绝 transform，不支持导入背景中的带变换示
 | 参数数量或结构错误 | `error: invalid arguments. usage: <syntax>` |
 | 引号未闭合 | `error: unterminated quoted string` |
 | 未知转义 | `error: invalid escape sequence: <sequence>` |
+| 引号未独立包围参数 | `error: expected whitespace before quoted string` / `error: expected whitespace after quoted string` |
 | 非法或非有限数值 | `error: invalid number: <value>` |
 | 数值范围或运算结果非法 | `error: invalid value for <attribute>: <value>` |
 | 空历史（不在 IO 屏障状态） | `error: nothing to undo` / `error: nothing to redo` |
@@ -327,7 +342,7 @@ D09 已确认本阶段拒绝 transform，不支持导入背景中的带变换示
 
 ## 6. 分步实施与验收计划
 
-以下为分步计划；工程骨架、领域模型、命令历史与全部编辑命令已完成，接下来实现 CLI 分词、分发和展示。用户要求每次提交、推送前先询问；基础编辑阶段已按授权提交推送，当前结构编辑改动尚未提交或推送。截止时间待用户提供。
+以下为分步计划；工程骨架、领域模型、命令历史、全部编辑命令和 CLI 分词/分发/展示已完成，接下来实现 SVG 读写。用户要求每次提交、推送前先询问；结构编辑已按授权提交推送，当前 CLI 阶段改动尚未提交或推送。截止时间待用户提供。
 
 | 步骤 | 工作 | 验收条件 | 建议提交主题 |
 | --- | --- | --- | --- |
@@ -337,8 +352,8 @@ D09 已确认本阶段拒绝 transform，不支持导入背景中的带变换示
 | 4 | Command、HistoryManager、会话协调（机制已完成，具体命令后续加入） | 单元粒度、undo/redo、失败不变性正确 | feature - 实现命令历史与会话协调 |
 | 5 | create/delete/move/scale/set（应用 API 已完成，CLI 后续接入） | 六种图形及容器行为，参数错误和撤销通过 | feature - 实现基础图形编辑命令 |
 | 6 | group/ungroup/addto/front/back（应用 API 已完成，CLI 后续接入） | 父级、顺序、循环检查及完整恢复通过 | feature - 实现结构编辑命令 |
-| 7 | 分词、分发、REPL、tree/show/help | 引号、颜色、中文、注释、树形输出正确 | feature - 完善命令行解析与展示 |
-| 8 | SVG 编解码、文件适配、文档命令 | 导入临时验证、补 ID、round-trip、历史屏障通过 | feature - 实现 SVG 文件读写 |
+| 7 | 分词、分发、REPL、tree/show/help；提前接入无文件 IO 的 init/canvas（已完成） | 引号、颜色、中文、注释、树形输出、终端编辑与屏障正确 | feature - 完善命令行解析与展示 |
+| 8 | SVG 编解码、文件适配、read/save 文档命令 | 导入临时验证、补 ID、round-trip、历史屏障通过 | feature - 实现 SVG 文件读写 |
 | 9 | 集成示例、回归测试与修正 | §6 会话与 §6.1 版本 A 能回放；浏览器预览正确 | test - 增加完整验收场景 |
 | 10 | 更新过程记录、依赖自查、运行说明 | 文档描述符合实际代码，未通过项如实列出 | doc - 完成交付文档与一致性自查 |
 | 11 | 干净检出验证、最终推送与标签 | final 指向最终提交，远程可见且满足截止时间 | 最终提交后创建并推送 final |
@@ -373,6 +388,10 @@ D09 已确认本阶段拒绝 transform，不支持导入背景中的带变换示
 | 2026-10-12 | 用户授权提交推送基础编辑，并继续结构命令阶段 | 上一阶段已推送；加入五个结构命令，复用文档校验与历史包装，新阶段提交需再次确认 |
 | 2026-10-12 | 根级组禁止 ungroup，但 undo 必须能撤销它的创建 | GroupCommand 逆操作继续使用精确快照；测试区分用户解组限制和历史恢复，混合结构序列可以完整撤销重做 |
 | 2026-10-12 | 已在目标组或排序边界的操作可能被误判为无需历史 | 按 D13/D17 仍视为成功编辑入栈并清空 redo；363 项测试通过 |
+| 2026-10-13 | 用户要求继续下一阶段；CLI 需要从无文档状态开始编辑 | 完成步骤 7，并将无文件 IO 的 init/canvas 提前接入；read/save 保留待实现提示 |
+| 2026-10-13 | create 的 in 尾缀可能与文本或 ID 重名；异步执行需要保持脚本顺序 | 分词保留引号信息，只从参数尾部识别子句；REPL 逐条 await，并测试 EOF 最后一行、错误后继续与异步输出 |
+| 2026-10-13 | 查询命令需要展示能力，又不能依赖具体展示实现 | 应用层定义结构接口，bootstrap 注入 Formatter，presentation 保持仅依赖 domain；通过 Visitor 输出树与属性 |
+| 2026-10-13 | 完成 CLI 与中文流程图回放 | 14 个测试文件、436 项测试、类型检查和生产构建通过；增加可运行的 examples/flowchart.cli |
 
 记录真实讨论和修正，不编造用户审阅意见、测试结果或 AI 发现过程。
 
@@ -388,13 +407,16 @@ D09 已确认本阶段拒绝 transform，不支持导入背景中的带变换示
 | 图形领域模型 | 在既定 shapes/traversal 模块加入校验与两步几何更新辅助类 | 保证复合操作失败原子性，深复制保持对象行为 | 六种图形、Visitor、领域测试 | 已完成并验证 |
 | 文档树管理 | 在既定 document 模块实现文档与快照，结构变更通过领域内部 Symbol 协调 | 同步维护树、索引、父级和文档归属，不开放普通可变子列表 | SvgDocument、DocumentSnapshot、Shape/GroupShape、领域测试 | 已完成并验证 |
 | Command 与历史 | 采用多态命令分类、执行包装与候选状态提交 | 一次执行一个历史单元，失败不改变原状态，异步执行保持输入顺序 | commands/history/session 与应用测试 | 已验证，基础命令已加入 |
-| 基础编辑 | 集中工厂加五个具体 EditCommand；结果记录当次撤销摘要 | 避免类型重复分派和可复用命令的旧值覆盖 | factory、基础命令、两个 Visitor、测试 | 已完成并验证，CLI 接入待后续 |
-| 结构编辑 | 五个具体命令复用文档规则与历史快照 | 每次一个撤销单元，精确恢复原父级、顺序、子树和容器样式 | 结构命令与应用测试 | 已完成并验证，CLI 接入待后续 |
+| 基础编辑 | 集中工厂加五个具体 EditCommand；结果记录当次撤销摘要 | 避免类型重复分派和可复用命令的旧值覆盖 | factory、基础命令、两个 Visitor、测试 | 已完成并验证，CLI 已接入 |
+| 结构编辑 | 五个具体命令复用文档规则与历史快照 | 每次一个撤销单元，精确恢复原父级、顺序、子树和容器样式 | 结构命令与应用测试 | 已完成并验证，CLI 已接入 |
+| CLI 与展示 | 在既定分词/分发/展示模块实现；新增三个应用展示接口 | 保留两处名称分派和原有依赖方向；应用查询可以注入展示实现 | CLI、presentation、ports、查询命令、启动与测试 | 已完成并验证 |
+| 步骤 7/8 顺序微调 | 无文件 IO 的 init/canvas 提前到步骤 7 | 让 CLI 可独立初始化和编辑；文档屏障规则不变 | 初始化、画布命令与 CLI 回放 | 实施记录，read/save 仍属步骤 8 |
+| 可选尺寸细化 | init 缺省维度用 800/600；canvas 单参数保留当前高度 | 落实两个独立可选位置参数，不额外修改未指定的当前高度 | init/canvas、help、运行说明与测试 | 实施细化，已测试 |
 | D18 | main 为主分支，分步提交推送，最终打 final | 用户批准流程；实际截止时间尚未提供 | Git 与交付验收 | 流程已确认，截止时间待补充 |
 
 ## 8. 一致性自查
 
-当前完成工程骨架、领域模型、集中工厂、应用机制和十个编辑命令。自查只覆盖已有代码；CLI 展示与持久化仍待实现验证。
+当前完成工程骨架、领域模型、集中工厂、应用机制、全部编辑命令和 CLI 解析展示。自查只覆盖已有代码；持久化仍待实现验证。
 
 | 检查 | 方法 | 当前状态 |
 | --- | --- | --- |
@@ -403,7 +425,7 @@ D09 已确认本阶段拒绝 transform，不支持导入背景中的带变换示
 | 依赖方向符合规则 | 抽查 imports，特别检查 domain/application 是否导入 CLI、文件或 XML 实现 | domain 仅依赖自身；application 仅依赖自身与 domain，无 Node/CLI/XML/具体基础设施依赖 |
 | 仅两处名称分派 | 搜索 switch、tag/type 比较及类型映射，人工判断是否形成重复分派 | 工厂集中类型映射；摘要和属性读取走 Visitor；无重复 tag/switch/instanceof 分派 |
 | Command 与 Composite 真实落地 | 检查具体命令和容器多态行为，结合测试结果 | 十个编辑命令与可撤销包装已测试；整组编辑、跨级迁移和恢复均保持子树语义 |
-| 文档与实际行为一致 | 对照决策表、CLI 输出和 SVG 支持矩阵 | 待实现后检查 |
+| 文档与实际行为一致 | 对照决策表、CLI 输出和 SVG 支持矩阵 | CLI 编辑/查询、空文档和历史屏障已有回放；SVG 支持矩阵待持久化实现后验证 |
 
 ## 9. 质量保证手段与验收清单
 
@@ -530,3 +552,18 @@ D09 已确认本阶段拒绝 transform，不支持导入背景中的带变换示
 - 同一 AddToCommand 复用保留每次原父级摘要；混合分组/迁移/排序/解组序列四次 undo 和四次 redo 恢复精确树状态。
 
 所有编辑命令在应用 API 层已实现；CLI 解析、tree/show/help 与文件 IO 尚未接入。
+
+### 9.7 CLI 分词、分发、展示与回放验证（2026-10-13）
+
+`npm run check` 已通过：严格类型检查、14 个测试文件中的 436 项测试、生产构建。本次新增 73 项测试，并将原骨架的未知命令测试改为真实编辑与错误恢复测试；既有领域与应用测试全部通过。
+
+- 分词保留中文、空白、空文本、颜色、双引号/反斜杠转义和引号状态；拒绝未闭合引号、未知转义与参数粘连，整行注释不参与解析。
+- 唯一分发器接入六种图形创建、十个编辑命令、undo/redo、初始化/画布与三个显示命令；测试包含命名为 in 的组、文本字面值 in 和带引号伪造尾缀。
+- 真实终端命令链混合移动、缩放、文本修改、分组、排序、解组、迁移、删除，多次 undo/redo 恢复同一树形状态。
+- 成功查询与失败解析/目标校验均保留 redo；无文档错误、空历史、文档屏障分别验证。init 失败保留旧路径和历史，成功清空路径；resize 保留路径和图形。
+- TreeFormatter 的连接符、根/子树/叶子、全部几何类型、文本转义和显式样式逐字断言；ShowFormatter 验证父级、完整字段、空文本和容器信息，不伪造继承属性。
+- CLI 子进程回放 `examples/flowchart.cli`，验证中文内容、父子关系、移动/撤销/重做及最后树输出；CRLF 与无末尾换行、错误后继续、最终非零退出均通过。
+- 流测试延迟返回命令结果，验证 REPL 等待执行顺序，警告先于结果，异常只输出一行，多行展示保留原换行。
+- 编译后的 `dist/bootstrap/main.js` 另行回放同一中文脚本，退出码 0、标准错误为空，结果包含“处理数据 v2”。`git diff --check` 通过，未增加图形名称分派位置或反向模块依赖。
+
+本阶段验证覆盖内存编辑与 CLI 展示。read/save 仍明确报尚未实现，未声称完成 SVG 导入导出、浏览器预览或最终完整课程会话验收。

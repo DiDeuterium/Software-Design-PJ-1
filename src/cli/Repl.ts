@@ -25,7 +25,7 @@ export class Repl {
     // Interactive Ctrl+C closes the loop; piped scripts finish on EOF.
     reader.on('SIGINT', () => reader.close());
     reader.setPrompt('svg> ');
-    this.output.write('svg-editor 0.1 — CLI scaffold (commands pending)\n');
+    this.output.write("svg-editor 0.1 — type 'help' for commands\n");
     reader.prompt();
 
     try {
@@ -33,7 +33,13 @@ export class Repl {
         const trimmedLine = line.trim();
         if (trimmedLine.length > 0 && !trimmedLine.startsWith('#')) {
           try {
-            this.dispatcher.dispatch(line);
+            const result = await this.dispatcher.dispatch(line);
+            if (result !== undefined) {
+              for (const warning of result.warnings) {
+                this.output.write(`warning: ${warning.replace(/[\r\n]+/gu, ' ')}\n`);
+              }
+              this.output.write(`${result.message}\n`);
+            }
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'command failed';
             this.output.write(`error: ${message.replace(/[\r\n]+/gu, ' ')}\n`);
