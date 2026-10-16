@@ -1,6 +1,6 @@
 # Software Design PJ1 — SVG CLI Editor
 
-TypeScript 面向对象 SVG 编辑器。六种图形、全部十个编辑命令、undo/redo、init/canvas、tree/show/help 和 SVG read/save 均已接入 CLI。下一阶段进行完整场景验收和交付整理。
+TypeScript 面向对象 SVG 编辑器。六种图形、全部十个编辑命令、undo/redo、init/canvas、tree/show/help 和 SVG read/save 均已接入 CLI。完整课程场景和用户回传截图的视觉验收已通过，下一步进行最终交付整理。
 
 架构与行为约定见 [doc/README.md](doc/README.md)，课程要求见 [phase_cli_1.md](phase_cli_1.md)。
 
@@ -90,7 +90,9 @@ npm run build
 
 也可执行 `npm run check` 连续完成上述三项，或用 `npm run test:watch` 进入测试监听。
 
-当前 18 个测试文件、518 项测试覆盖领域模型、应用机制、全部命令、CLI 回放、SVG 严格导入和读写往返。文件测试覆盖真实覆盖保存、临时写入/刷盘/替换失败、旧文件保留、临时文件清理、默认路径和历史屏障。
+当前 19 个测试文件、520 项测试覆盖领域模型、应用机制、全部命令、CLI 回放、SVG 严格导入和读写往返。文件测试覆盖真实覆盖保存、临时写入/刷盘/替换失败、旧文件保留、临时文件清理、默认路径和历史屏障。
+
+完整课程会话和版本 A 的逐条验收、编译入口输出、SVG 产物及用户提供的预览截图见 [验收记录](doc/acceptance/README.md)。§6 会话包含两条预期错误，脚本退出码为 1，测试按预期错误和后续完整输出判断通过。
 
 ## 目录
 

@@ -1,0 +1,21 @@
+{
+  "entry": "dist/bootstrap/main.js",
+  "scenarios": [
+    {
+      "section": "session",
+      "commands": 19,
+      "outputLines": 32,
+      "expectedExit": 1,
+      "artifact": "demo.svg",
+      "reloadedExit": 0
+    },
+    {
+      "section": "flowchart",
+      "commands": 14,
+      "outputLines": 22,
+      "expectedExit": 0,
+      "artifact": "flowchart.svg",
+      "reloadedExit": 0
+    }
+  ]
+}
