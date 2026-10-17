@@ -1,8 +1,8 @@
 # Software Design PJ1 — SVG CLI Editor
 
-TypeScript 面向对象 SVG 编辑器。六种图形、全部十个编辑命令、undo/redo、init/canvas、tree/show/help 和 SVG read/save 均已接入 CLI。完整课程场景和用户回传截图的视觉验收已通过，下一步进行最终交付整理。
+TypeScript 面向对象 SVG 编辑器。六种图形、全部十个编辑命令、undo/redo、init/canvas、tree/show/help 和 SVG read/save 均已接入 CLI。完整课程场景、用户回传截图的视觉检查和干净检出安装运行验证均已通过。
 
-架构与行为约定见 [doc/README.md](doc/README.md)，课程要求见 [phase_cli_1.md](phase_cli_1.md)。
+最终设计文档见 [doc/README.md](doc/README.md)，行为约定见 [设计决策](doc/decisions.md)，课程要求见 [phase_cli_1.md](phase_cli_1.md)。
 
 ## 环境与安装
 
@@ -76,7 +76,7 @@ read 成功时替换当前文档并记住路径；缺失 ID 自动补全，警�
 
 save 默认覆盖已有文件，先在同目录写入独占临时文件并刷盘，再替换目标。读写失败保留当前文档、默认路径和历史；无法完成替换时保留旧文件，尽力清理本次临时文件。
 
-导入支持 UTF-8 / XML 1.0 的 rect、circle、ellipse、line、text、g，以及设计文档规定的属性。根 width/height 必须存在且为正数（数值或 px）；viewBox 只能省略或等价于 `0 0 width height`。支持 SVG 命名空间、注释、文本 CDATA、XML 标准实体和数字字符引用；不支持 transform、未知元素/属性、DOCTYPE、自定义实体或处理指令，遇到这些内容整次 read 失败。完整支持矩阵见 [设计文档 §5.1](doc/README.md#51-svg-导入与属性支持矩阵落实-d09)。
+导入支持 UTF-8 / XML 1.0 的 rect、circle、ellipse、line、text、g，以及已确认的属性。根 width/height 必须存在且为正数（数值或 px）；viewBox 只能省略或等价于 `0 0 width height`。支持 SVG 命名空间、注释、文本 CDATA、XML 标准实体和数字字符引用；不支持 transform、未知元素/属性、DOCTYPE、自定义实体或处理指令，遇到这些内容整次 read 失败。完整支持矩阵见 [设计决策](doc/decisions.md)。
 
 示例：[other.svg](examples/other.svg) 是课程中的外部 SVG，含一个缺失 ID；[flowchart.svg](examples/flowchart.svg) 由编译后的 CLI 回放流程图脚本并保存生成，已验证可以重新读入。
 
@@ -93,6 +93,8 @@ npm run build
 当前 19 个测试文件、520 项测试覆盖领域模型、应用机制、全部命令、CLI 回放、SVG 严格导入和读写往返。文件测试覆盖真实覆盖保存、临时写入/刷盘/替换失败、旧文件保留、临时文件清理、默认路径和历史屏障。
 
 完整课程会话和版本 A 的逐条验收、编译入口输出、SVG 产物及用户提供的预览截图见 [验收记录](doc/acceptance/README.md)。§6 会话包含两条预期错误，脚本退出码为 1，测试按预期错误和后续完整输出判断通过。
+
+另在全新 Git 检出中，使用独立空 npm 缓存安装依赖，完成全部检查、源码/编译启动及完整会话回放。验证后工作区和锁文件保持不变，详见 [干净检出验证记录](doc/verification/README.md)。
 
 ## 目录
 

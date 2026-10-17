@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-16",
+  "baselineCommit": "48381b1961a5080fd2406ddcb4eed1e7d20d71c3",
+  "node": "v22.17.1",
+  "npm": "10.9.2",
+  "initialState": {
+    "clean": true,
+    "nodeModulesPresent": false,
+    "distPresent": false
+  },
+  "installation": {
+    "command": "npm ci --cache <fresh isolated cache> --no-fund --no-audit",
+    "exitCode": 0,
+    "addedPackages": 50
+  },
+  "check": {
+    "command": "npm run check",
+    "exitCode": 0,
+    "testFiles": 19,
+    "tests": 520,
+    "typecheck": true,
+    "build": true
+  },
+  "verifiedSourceFiles": 99,
+  "runtimeLoader": "checkout/node_modules/tsx/dist/loader.mjs",
+  "startups": [
+    {
+      "script": "npm run cli",
+      "exitCode": 0
+    },
+    {
+      "script": "npm start",
+      "exitCode": 0
+    }
+  ],
+  "scenarios": [
+    {
+      "section": "session",
+      "commands": 19,
+      "outputLines": 32,
+      "exitCode": 1,
+      "reloadedExit": 0
+    },
+    {
+      "section": "flowchart",
+      "commands": 14,
+      "outputLines": 22,
+      "exitCode": 0,
+      "reloadedExit": 0
+    }
+  ],
+  "postCheckCleanStatus": true,
+  "lockFileUnchanged": true
+}

@@ -1,5 +1,5 @@
 @startuml
-title PJ1 Phase 1 - Proposed module dependencies
+title PJ1 Phase 1 - Module dependencies
 left to right direction
 skinparam componentStyle rectangle
 component "bootstrap" as B
@@ -17,14 +17,13 @@ B --> P
 B --> A
 B --> I
 C --> A
-C --> P
 P --> D
 A --> D
 A --> Ports
 Ports --> D
 Views --> D
 A --> Views
-P ..|> Views : structural typing (no import)
+P ..|> Views : structural conformance (no import)
 I ..|> Ports
 I --> D
 note bottom of D
