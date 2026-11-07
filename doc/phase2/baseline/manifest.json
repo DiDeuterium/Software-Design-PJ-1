@@ -1,0 +1,36 @@
+{
+  "final": "251127e69abb2512dc787efe6a92dd30ab9514d4",
+  "node": "v22.17.1",
+  "scenarios": [
+    {
+      "name": "cli-1",
+      "exitCode": 1,
+      "sha256": "f10db543aca051183cbc5a2e445fbcb3738b76819d2b4124fdc6b673342e2486"
+    },
+    {
+      "name": "flowchart-a",
+      "exitCode": 0,
+      "sha256": "0a07529b0da97c9788097612e6aaecd4fc6ead66214c6c8dd5b0a80b59cd2294"
+    },
+    {
+      "name": "help",
+      "exitCode": 0,
+      "sha256": "9ba5ed2c739aebe4c36a69a984ca8d3018f30d64edaaefcaa5df8e698ab435f4"
+    },
+    {
+      "name": "empty",
+      "exitCode": 0,
+      "sha256": "0624724ff831b8f916018d2b63434ef70b872ea78ec9f138e38cdfe2e9621f9d"
+    },
+    {
+      "name": "no-document",
+      "exitCode": 1,
+      "sha256": "d6470058b9414689496546ab0a14cb3156afd733d24e899ebbd7bde2f6745bfc"
+    },
+    {
+      "name": "shapes-history",
+      "exitCode": 1,
+      "sha256": "2c5d3e41a88337c28a4c3ab02dbb1e71801e67a2743b4e1cf1524cc0e4099fcc"
+    }
+  ]
+}

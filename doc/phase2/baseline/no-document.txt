@@ -1,0 +1,8 @@
+tree
+show missing
+undo
+redo
+canvas
+create g g
+unknown
+help
