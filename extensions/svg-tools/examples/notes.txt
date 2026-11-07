@@ -1,0 +1,1 @@
+Ordinary files have no SVG badge.

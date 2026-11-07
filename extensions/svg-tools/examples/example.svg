@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600">
+  <g id="flow">
+    <rect id="start" x="30" y="70" width="120" height="60" fill="#4a90d9"/>
+    <text x="50" y="105">开始</text>
+    <g id="nested">
+      <circle id="end" cx="300" cy="100" r="25"/>
+    </g>
+  </g>
+</svg>

@@ -108,6 +108,10 @@ npm run build
 
 业务类遵循一类一文件；bootstrap/main.ts 和工具配置是装配入口，不承载领域逻辑。
 
+## 第二阶段：VS Code 扩展实践
+
+第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
+
 ## 提交约定
 
 Commit 信息使用 `类型 - 简要中文说明`，类型按内容选择，例如 `feature`、`fix`、`doc`、`test`、`chore`。

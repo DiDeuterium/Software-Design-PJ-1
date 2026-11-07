@@ -1,0 +1,8 @@
+src/**
+tests/**
+scripts/**
+node_modules/**
+dist-test/**
+.test-*/**
+tsconfig.json
+package-lock.json
