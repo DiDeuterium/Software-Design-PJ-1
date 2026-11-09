@@ -1,0 +1,37 @@
+@startuml
+title Phase 2 target architecture (step 2 design, not current runtime)
+package "Host / composition (steps 3-4)" as Host {
+  [Code assembly A] as A
+  [Config module loader B] as B
+  [Filesystem adapters] as IO
+}
+package "Core" {
+  [public contracts] as Public
+  [PluginRegistry] as Registry
+  [Session / document / history\n(step 3 migration)] as Runtime
+  [Generic presentation / SVG\n(step 3 migration)] as Render
+  [AttributeDispatcher / TreeLabels] as Hooks
+}
+package "Plugins (steps 3, 5-7)" as Plugins {
+  [Default commands / six providers] as Builtin
+  [stats / dir / box / modified-star] as Optional
+}
+A --> Registry : activate(manifest, instance, options)
+B --> Registry : same activation path
+A --> Plugins : construct
+B --> Plugins : resolve module strings
+IO ..|> Public : implement ports
+Registry --> Public
+Runtime --> Public
+Render --> Public
+Hooks --> Public
+Runtime --> Hooks
+Render --> Hooks
+Builtin --> Public
+Optional --> Public
+Host --> Runtime : wire dependencies
+note bottom of Public
+  Four extension points and public domain/session/IO protocols.
+  No dependency on plugin implementations or the host.
+end note
+@enduml

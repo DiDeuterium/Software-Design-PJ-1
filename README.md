@@ -112,6 +112,8 @@ npm run build
 
 第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
 
+步骤2已定义 CLI 四个扩展点、原子注册上下文与四条 ADR，见 [架构与契约](doc/phase2/architecture/README.md)。新增 9 项契约测试可单独运行 `npx vitest run tests/core/ExtensionContracts.test.ts`；原 CLI 尚未接入新接口，完整迁移留在步骤3。
+
 ## 提交约定
 
 Commit 信息使用 `类型 - 简要中文说明`，类型按内容选择，例如 `feature`、`fix`、`doc`、`test`、`chore`。

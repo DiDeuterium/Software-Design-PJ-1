@@ -3,7 +3,9 @@
 
 ## 架构方案
 
-第一阶段 CLI 已交付；第二阶段当前完成 VS Code 扩展实践，CLI 四个扩展点的重构尚未开始。以下原有 CLI 架构继续作为重构前状态，扩展实践独立说明。
+第一阶段 CLI 已交付；第二阶段已完成 VS Code 实践，以及步骤2的四个公开扩展点、注册上下文与 ADR。CLI 运行逻辑尚未迁移，以下原有 CLI 架构继续作为重构前状态。
+
+步骤2的 [扩展点清单与调用契约](phase2/architecture/README.md)、[四条 ADR](phase2/architecture/adr.md) 和 [目标依赖图](phase2/architecture/target.puml) 单独记录。src/core/public 定义 ShapeProvider、Command、TreeDecorator、AttributeHandler 及公开领域/会话端口；PluginRegistry 提供暂存、校验和原子注册，AttributeDispatcher 与 TreeLabels 分别验证属性分发及标签组合。9 项替身契约测试与严格类型检查通过；这些证据不代表生产 CLI 已完成框架重构，步骤3还需实际迁移、回归及首次 metrics。
 
 ### VS Code 扩展实践
 
