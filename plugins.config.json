@@ -1,3 +1,6 @@
 {
-  "plugins": []
+  "plugins": [
+    { "module": "./dist/plugins/command-stats" },
+    { "module": "./dist/plugins/command-dir" }
+  ]
 }

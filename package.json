@@ -11,7 +11,7 @@
   "scripts": {
     "cli": "tsx src/bootstrap/main.ts",
     "start": "node dist/bootstrap/main.js",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/CopyPluginManifests.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
