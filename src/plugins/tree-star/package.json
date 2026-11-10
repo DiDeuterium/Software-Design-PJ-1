@@ -1,0 +1,6 @@
+{
+  "name": "@svgframe/plugin-tree-star",
+  "type": "module",
+  "main": "./TreeStarPlugin.js",
+  "contributes": { "decorators": ["modified-star"] }
+}

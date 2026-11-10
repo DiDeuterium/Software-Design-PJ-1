@@ -90,7 +90,7 @@ npm run build
 
 也可执行 `npm run check` 连续完成上述三项，或用 `npm run test:watch` 进入测试监听。
 
-当前22个测试文件、539项测试包含原520项回归、9项契约、9项生产框架贯通及1项指标口径测试。另用六组原始字节基线核验新编译入口。文件测试覆盖覆盖保存、临时写入/刷盘/替换失败、旧文件保留、默认路径和历史屏障。
+步骤3整套回归的22个测试文件、539项测试包含原520项回归、9项契约、9项生产框架贯通及1项指标口径测试，另用六组原始字节基线核验新入口。步骤4–7的加载器及插件按各自记录完成针对性验证，未在每步重复整套回归。文件测试覆盖覆盖保存、临时写入/刷盘/替换失败、旧文件保留、默认路径和历史屏障。
 
 完整课程会话和版本 A 的逐条验收、编译入口输出、SVG 产物及用户提供的预览截图见 [验收记录](doc/acceptance/README.md)。§6 会话包含两条预期错误，脚本退出码为 1，测试按预期错误和后续完整输出判断通过。
 
@@ -111,7 +111,7 @@ npm run build
 
 第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
 
-步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 已按代码提交 cf0e544 重算。步骤4完成 [双装配](doc/phase2/assembly/README.md)，步骤5新增 [stats/dir](doc/phase2/commands/README.md)，步骤6新增 [box复合图形与类型标签](doc/phase2/box/README.md)。先 `npm run build`，再 `npm run cli -- --config plugins.config.json` 启用；不传配置仍保持原有能力。下一步为步骤7的 modified-star。
+步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 已按代码提交 cf0e544 重算。步骤4完成 [双装配](doc/phase2/assembly/README.md)，步骤5新增 [stats/dir](doc/phase2/commands/README.md)，步骤6新增 [box](doc/phase2/box/README.md)，步骤7新增 [modified-star](doc/phase2/star/README.md)。先 `npm run build`，再 `npm run cli -- --config plugins.config.json` 启用；不传配置保持原有能力。下一步为步骤8的完整双装配验收与提交差异举证。
 
 ## 提交约定
 
