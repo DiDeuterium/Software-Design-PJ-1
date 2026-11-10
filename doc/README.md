@@ -3,9 +3,17 @@
 
 ## 架构方案
 
-第一阶段 CLI 已交付；第二阶段已完成 VS Code 实践，以及步骤2的四个公开扩展点、注册上下文与 ADR。CLI 运行逻辑尚未迁移，以下原有 CLI 架构继续作为重构前状态。
+第一阶段 CLI 已交付；第二阶段已完成 VS Code 实践、步骤2公开契约与 ADR，以及步骤3生产 CLI 框架迁移。默认命令、六种图形和无标签输出保持第一阶段行为；配置加载和正式可选插件待后续步骤。
 
-步骤2的 [扩展点清单与调用契约](phase2/architecture/README.md)、[四条 ADR](phase2/architecture/adr.md) 和 [目标依赖图](phase2/architecture/target.puml) 单独记录。src/core/public 定义 ShapeProvider、Command、TreeDecorator、AttributeHandler 及公开领域/会话端口；PluginRegistry 提供暂存、校验和原子注册，AttributeDispatcher 与 TreeLabels 分别验证属性分发及标签组合。9 项替身契约测试与严格类型检查通过；这些证据不代表生产 CLI 已完成框架重构，步骤3还需实际迁移、回归及首次 metrics。
+步骤2的 [调用契约](phase2/architecture/README.md) 与 [四条 ADR](phase2/architecture/adr.md) 保留为设计记录。实际扩展点清单、调用文件/函数、默认行为、违约处理及生产验证见 [步骤3框架验收](phase2/framework/README.md)，其中区分测试替身与正式业务插件。
+
+### 当前 CLI 框架
+
+src/core 只依赖公开领域协议和扩展点，不导入插件或宿主。src/host/Runtime.ts 调用 PluginRegistry.activate 注册 BuiltinPlugin；命令分发只查询注册表，参数和帮助归插件。默认包注册六个 BuiltinProvider 与十九个 BuiltinCommand 实例。EditorDocument 通过 ShapeNode 的 children、withChildren、validateChildren、assertUngroup 管理容器；通用展示和 SVG 编码依赖 provider，不扩张固定 Visitor。
+
+EditorSession 保持串行候选事务和精确历史；属性多节点修改仍是一次编辑，失败保留文档与历史。成功事件交给标签实例，观察者故障隔离。无标签时树输出不增添字符。
+
+第一阶段实现迁入 src/plugins/builtin/legacy，旧路径为兼容导出；固定 Visitor 仅是默认包内部实现。兼容代码增加总代码量，[自动指标](../docs/metrics/report.md) 全部计入。[原图](phase2/baseline/before.puml) 与 [当前实际图](../docs/metrics/after.puml) 分别保存；当前指标标为工作树预览，提交后按代码 SHA 重算。以下第一阶段方案作为历史对照。
 
 ### VS Code 扩展实践
 
@@ -15,7 +23,7 @@
 
 完整宿主调用说明、模式对应关系、复用分析、安装启动步骤及截图见 [VS Code 实践记录](phase2/vscode/README.md)。
 
-### 模块划分与职责
+### 第一阶段模块划分与职责（历史对照）
 
 工程采用 TypeScript 面向对象实现，内置 rect、circle、ellipse、line、text 和 g。交互、用例协调、领域行为、展示与文件访问分别放在以下模块，具体依赖由启动入口装配。
 
@@ -159,6 +167,8 @@ end note
 
 ## 质量保证手段
 
+2026-11-09 步骤3：严格类型检查、生产构建、22文件539项测试通过；新编译入口六组第一阶段输出/退出码/SVG产物逐字节一致。分组 show 子项数量曾被适配器错误显示为0，基线定位后修正，并只重验受影响的框架测试和字节基线。[框架记录](phase2/framework/README.md) 区分旧 API 测试与新 Runtime 贯通覆盖。VS Code 与干净检出本轮未重跑；以下保留此前第一阶段和扩展验证的范围说明。
+
 ### 功能完整性与失败不变性
 
 VS Code 部分独立通过严格类型检查、构建和 17 项单元测试，真实 Extension Development Host 验证注册、嵌套/无 ID 元素、源码行号、未保存编辑更新、不完整 XML 清空与修复恢复，以及文件内容 SHA-256 不变。实际 UI 中的 [] 排除规则、点击定位与异常大纲已有截图。CLI 六组原始字节基线及原有 520 项测试全部回归通过；两套测试范围分开统计。
@@ -187,6 +197,6 @@ CLI 子进程测试覆盖中文、引号、空文本、转义、颜色、注释�
 
 当前待提交改动仅涉及文档；源码、测试、示例和构建配置等 99 个文件已逐一核对 SHA-256，与新检出一致。复制候选文档前，新检出在安装、测试和运行后仍保持 Git 工作区干净，锁文件未修改。候选文档另行检查了章节、链接与组件图一致性。原始结果与验证方法见 [干净检出验证记录](verification/README.md)。
 
-当前证据支持第一阶段功能与完整业务场景通过。范围限于已确认的 SVG 子集：不实现 box/插件或 GUI，不导入 transform、未知元素/属性、非恒等 viewBox、DTD 或自定义实体。完整快照的 O(N) 成本和文件替换的单机验证范围仍然存在，不能由测试通过推断任意规模或任意文件系统都具有相同行为。
+第一阶段证据支持当时功能与完整业务场景通过，当时不实现 box/插件或 GUI。第二阶段现已建立插件框架，正式 box 等插件仍待后续；默认导入继续限制为已确认子集，不导入 transform、未知元素/属性、非恒等 viewBox、DTD 或自定义实体。快照与文件替换的规模、平台限制仍然存在，不能由测试通过推断任意规模或文件系统都具有相同行为。
 
 上述结论包含已记录 Windows、Node.js v22.17.1、npm 10.9.2 环境下的全新检出安装与运行验证，不依赖原工作区的依赖或构建残留；其他操作系统和 Node 版本未作实测。

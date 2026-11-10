@@ -22,7 +22,8 @@ export interface DocumentDraft {
 export interface Session {
   query(action: (state: SessionView) => CommandOutput | Promise<CommandOutput>): Promise<CommandOutput>;
   edit(action: (candidate: EditDocument) => CommandOutput | Promise<CommandOutput>): Promise<CommandOutput>;
-  document(action: (draft: DocumentDraft) => CommandOutput | Promise<CommandOutput>): Promise<CommandOutput>;
+  document(action: (draft: DocumentDraft) => CommandOutput | Promise<CommandOutput>,
+    event?: 'init' | 'read' | 'save' | 'edit'): Promise<CommandOutput>;
   undo(): Promise<CommandOutput>;
   redo(): Promise<CommandOutput>;
 }

@@ -1,6 +1,6 @@
 # Software Design PJ1 — SVG CLI Editor
 
-TypeScript 面向对象 SVG 编辑器。六种图形、全部十个编辑命令、undo/redo、init/canvas、tree/show/help 和 SVG read/save 均已接入 CLI。完整课程场景、用户回传截图的视觉检查和干净检出安装运行验证均已通过。
+TypeScript 面向对象 SVG 编辑器。第二阶段步骤3已完成 CLI 插件框架迁移，默认保留六种图形、全部原命令和 SVG read/save。第一阶段课程场景、预览和干净检出记录保留；本轮新入口通过回归及字节兼容验证，后续双装配与正式插件仍待实现。
 
 最终设计文档见 [doc/README.md](doc/README.md)，行为约定见 [设计决策](doc/decisions.md)，课程要求见 [phase_cli_1.md](phase_cli_1.md)。
 
@@ -90,7 +90,7 @@ npm run build
 
 也可执行 `npm run check` 连续完成上述三项，或用 `npm run test:watch` 进入测试监听。
 
-当前 19 个测试文件、520 项测试覆盖领域模型、应用机制、全部命令、CLI 回放、SVG 严格导入和读写往返。文件测试覆盖真实覆盖保存、临时写入/刷盘/替换失败、旧文件保留、临时文件清理、默认路径和历史屏障。
+当前22个测试文件、539项测试包含原520项回归、9项契约、9项生产框架贯通及1项指标口径测试。另用六组原始字节基线核验新编译入口。文件测试覆盖覆盖保存、临时写入/刷盘/替换失败、旧文件保留、默认路径和历史屏障。
 
 完整课程会话和版本 A 的逐条验收、编译入口输出、SVG 产物及用户提供的预览截图见 [验收记录](doc/acceptance/README.md)。§6 会话包含两条预期错误，脚本退出码为 1，测试按预期错误和后续完整输出判断通过。
 
@@ -98,21 +98,20 @@ npm run build
 
 ## 目录
 
-- `src/domain`：已实现图形、集中工厂、文档树管理、快照与遍历协议。
-- `src/application`：编辑/文档/查询命令、历史与会话，以及展示、文件、SVG 编解码端口。
-- `src/cli`：保留引号信息的分词器、统一命令分发、异步 REPL。
-- `src/presentation`：TreeFormatter、ShowFormatter、HelpFormatter 与显式样式展示。
-- `src/infrastructure`：FastXmlSvgCodec、XML 输入验证、SVG Writer Visitor 与本地文件替换适配器。
-- `src/bootstrap`：依赖装配与启动。
+- `src/core`：公开扩展点、通用文档与事务、历史、注册分发、展示和 SVG 编解码。
+- `src/host`：装配、终端、本地文件与目录适配；`src/bootstrap`：启动入口。
+- `src/plugins/builtin`：默认六类图形和十九条命令，legacy 中保留第一阶段兼容实现。
+- 原 `src/domain`、`application`、`cli`、`presentation`、`infrastructure`：旧路径兼容导出，新内核不导入。
+- `scripts/Metrics.ts`、`docs/metrics`：指标生成和实际依赖图。
 - `tests`：自动测试；`examples`：流程图命令脚本、生成的 SVG 和课程导入示例。
 
 业务类遵循一类一文件；bootstrap/main.ts 和工具配置是装配入口，不承载领域逻辑。
 
-## 第二阶段：VS Code 扩展实践
+## 第二阶段进度
 
 第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
 
-步骤2已定义 CLI 四个扩展点、原子注册上下文与四条 ADR，见 [架构与契约](doc/phase2/architecture/README.md)。新增 9 项契约测试可单独运行 `npx vitest run tests/core/ExtensionContracts.test.ts`；原 CLI 尚未接入新接口，完整迁移留在步骤3。
+步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3已将生产 CLI 接到四个扩展点，详见 [框架验收](doc/phase2/framework/README.md)。[首份指标](docs/metrics/README.md) 明确标为工作树预览，提交后按 SHA 重算。下一步是步骤4的代码/配置双装配；正式 stats、dir、box 和树标签尚未接入。
 
 ## 提交约定
 

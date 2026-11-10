@@ -1,1 +1,2 @@
-export type ShapeParameter = string | number;
+/** Phase 1 compatibility export; production CLI uses core + registered plugins. */
+export * from '../../plugins/builtin/legacy/domain/factory/ShapeParameter.js';

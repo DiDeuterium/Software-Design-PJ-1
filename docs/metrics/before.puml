@@ -1,0 +1,18 @@
+@startuml
+title Generated CLI dependencies: 251127e69abb2512dc787efe6a92dd30ab9514d4
+component "src/application" as M0
+component "src/bootstrap" as M1
+component "src/cli" as M2
+component "src/domain" as M3
+component "src/infrastructure" as M4
+component "src/presentation" as M5
+M0 --> M3
+M1 --> M0
+M1 --> M2
+M1 --> M4
+M1 --> M5
+M2 --> M0
+M4 --> M0
+M4 --> M3
+M5 --> M3
+@enduml

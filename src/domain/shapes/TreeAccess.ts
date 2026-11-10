@@ -1,4 +1,2 @@
-/** @internal Structural access is reserved for SvgDocument, not application commands. */
-export const treeEdit: unique symbol = Symbol('document tree edit');
-export const treeOwner: unique symbol = Symbol('document membership');
-export const treeChildren: unique symbol = Symbol('document children replacement');
+/** Phase 1 compatibility export; production CLI uses core + registered plugins. */
+export * from '../../plugins/builtin/legacy/domain/shapes/TreeAccess.js';

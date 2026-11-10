@@ -1,18 +1,22 @@
 import type { ShapeNode, ShapeView } from './Shape.js';
 
 export interface DocumentView {
+  readonly size: number;
   readonly width: number;
   readonly height: number;
   readonly roots: readonly ShapeView[];
   getShape(id: string): ShapeView;
+  parentOf(id: string): ShapeView | undefined;
 }
 
 /** Only handed to an edit callback; references must not escape that callback. */
 export interface EditDocument {
+  readonly size: number;
   readonly width: number;
   readonly height: number;
   readonly roots: readonly ShapeNode[];
   getShape(id: string): ShapeNode;
+  parentOf(id: string): ShapeNode | undefined;
   view(): DocumentView;
   resize(width: number, height: number): void;
   insert(shape: ShapeNode, parentId?: string): void;

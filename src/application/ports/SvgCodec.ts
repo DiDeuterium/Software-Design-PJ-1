@@ -1,7 +1,2 @@
-import type { SvgDocument } from '../../domain/document/SvgDocument.js';
-import type { SvgReadResult } from './SvgReadResult.js';
-
-export interface SvgCodec {
-  decode(source: string): SvgReadResult;
-  encode(document: SvgDocument): string;
-}
+/** Phase 1 compatibility export; production CLI uses core + registered plugins. */
+export * from '../../plugins/builtin/legacy/application/ports/SvgCodec.js';

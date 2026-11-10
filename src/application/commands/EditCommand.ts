@@ -1,17 +1,2 @@
-import type { SvgDocument } from '../../domain/document/SvgDocument.js';
-import type { EditorSession } from '../session/EditorSession.js';
-import { Command } from './Command.js';
-import { CommandResult } from './CommandResult.js';
-
-export abstract class EditCommand extends Command {
-  public override execute(session: EditorSession): Promise<CommandResult> {
-    return session.executeEdit(this);
-  }
-
-  /** @internal Applies only to a private candidate document, not live state. */
-  public abstract apply(document: SvgDocument): CommandResult | Promise<CommandResult>;
-
-  public describeUndo(result: CommandResult): CommandResult {
-    return new CommandResult(result.undoMessage ?? `undone: ${result.message}`);
-  }
-}
+/** Phase 1 compatibility export; production CLI uses core + registered plugins. */
+export * from '../../plugins/builtin/legacy/application/commands/EditCommand.js';

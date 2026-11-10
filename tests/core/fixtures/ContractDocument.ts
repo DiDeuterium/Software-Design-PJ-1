@@ -8,6 +8,22 @@ export class ContractDocument implements EditDocument {
   public get width(): number { return 800; }
   public get height(): number { return 600; }
   public get roots(): readonly ContractShape[] { return this.nodes; }
+  public get size(): number {
+    const count = (nodes: readonly ShapeView[]): number => nodes.reduce((total, node) => total + 1 + count(node.children), 0);
+    return count(this.nodes);
+  }
+  public parentOf(id: string): ContractShape | undefined {
+    this.getShape(id);
+    const find = (nodes: readonly ContractShape[]): ContractShape | undefined => {
+      for (const node of nodes) {
+        if (node.children.some(child => child.id === id)) return node;
+        const result = find(node.children);
+        if (result !== undefined) return result;
+      }
+      return undefined;
+    };
+    return find(this.nodes);
+  }
   public getShape(id: string): ContractShape {
     const find = (nodes: readonly ContractShape[]): ContractShape | undefined => {
       for (const node of nodes) {
@@ -27,7 +43,11 @@ export class ContractDocument implements EditDocument {
     const index = new Map<string, ShapeView>();
     const visit = (shape: ShapeView): void => { index.set(shape.id, shape); shape.children.forEach(visit); };
     roots.forEach(visit);
-    return Object.freeze({ width: this.width, height: this.height, roots, getShape(id: string): ShapeView {
+    const parents = new Map<string, ShapeView>();
+    const collect = (shape: ShapeView): void => { shape.children.forEach(child => { parents.set(child.id, shape); collect(child); }); };
+    roots.forEach(collect);
+    return Object.freeze({ width: this.width, height: this.height, size: this.size, roots,
+      parentOf(id: string): ShapeView | undefined { return parents.get(id); }, getShape(id: string): ShapeView {
       const result = index.get(id);
       if (result === undefined) throw new Error(`no such shape: ${id}`);
       return result;
