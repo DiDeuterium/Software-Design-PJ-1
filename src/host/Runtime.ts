@@ -12,8 +12,10 @@ import type { Extensions } from '../core/public/Extensions.js';
 import { BuiltinPlugin } from '../plugins/builtin/BuiltinPlugin.js';
 import { LocalFileStore } from './filesystem/LocalFileStore.js';
 import { LocalDirectoryReader } from './filesystem/LocalDirectoryReader.js';
+import { PluginLoader } from './plugins/PluginLoader.js';
 
 export interface RuntimeOptions {
+  readonly configFile?: string;
   readonly builtins?: boolean;
   readonly workingDirectory?: string;
   readonly files?: FileStore;
@@ -33,7 +35,9 @@ export async function createRuntime(options: RuntimeOptions = {}) {
   const codec = new SvgCodec(extensions);
   if (options.builtins !== false) await registry.activate(BuiltinPlugin.manifest,
     new BuiltinPlugin(options.files ?? new LocalFileStore(), codec, new DocumentFactory(), presentation, shapes));
-  for (const entry of options.plugins ?? []) await registry.activate(entry.manifest, entry.plugin, entry.options);
+  const loader = new PluginLoader(registry, options.report ?? (() => undefined));
+  for (const entry of options.plugins ?? []) await loader.activate(entry.manifest, entry.plugin, entry.options);
+  if (options.configFile !== undefined) await loader.loadConfig(options.configFile);
   const workingDirectory = options.workingDirectory ?? process.cwd();
   const dispatcher = new CommandDispatcher(() => ({ session, extensions: extensions(),
     attributes: new AttributeDispatcher(extensions().attributes), workingDirectory }));

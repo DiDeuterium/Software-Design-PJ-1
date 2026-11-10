@@ -111,7 +111,7 @@ npm run build
 
 第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
 
-步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3已将生产 CLI 接到四个扩展点，详见 [框架验收](doc/phase2/framework/README.md)。[首份指标](docs/metrics/README.md) 明确标为工作树预览，提交后按 SHA 重算。下一步是步骤4的代码/配置双装配；正式 stats、dir、box 和树标签尚未接入。
+步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 已按代码提交 cf0e544 重算。步骤4完成 [代码/配置双装配](doc/phase2/assembly/README.md)，可通过 `npm run cli -- --config plugins.config.json` 启动。下一步为步骤5的 stats/dir；正式 box 和树标签也尚未接入。
 
 ## 提交约定
 
