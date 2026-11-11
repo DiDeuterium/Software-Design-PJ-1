@@ -1,0 +1,78 @@
+{
+  "records": [
+    {
+      "label": "commands-B",
+      "commit": "969ca05f22f30a4e757065db5b6179428d09d4f1",
+      "parent": "60e0f23a7944b146c9c8023d23a1f90823834173",
+      "newPlugins": [
+        "command-stats",
+        "command-dir"
+      ],
+      "permittedAssemblyFile": null,
+      "protectedPaths": [
+        "src/core",
+        "src/host",
+        "src/bootstrap",
+        "src/plugins/builtin"
+      ],
+      "protectedDiffBytes": 0
+    },
+    {
+      "label": "box-B",
+      "commit": "c2a83b63dbaada29bd0aeed3445147c1d23b0cdf",
+      "parent": "969ca05f22f30a4e757065db5b6179428d09d4f1",
+      "newPlugins": [
+        "shape-box"
+      ],
+      "permittedAssemblyFile": null,
+      "protectedPaths": [
+        "src/core",
+        "src/host",
+        "src/bootstrap",
+        "src/plugins/builtin",
+        "src/plugins/command-dir",
+        "src/plugins/command-stats"
+      ],
+      "protectedDiffBytes": 0
+    },
+    {
+      "label": "star-B",
+      "commit": "4e8e80d86fb8ee683be04083bc033c70f1f74142",
+      "parent": "c2a83b63dbaada29bd0aeed3445147c1d23b0cdf",
+      "newPlugins": [
+        "tree-star"
+      ],
+      "permittedAssemblyFile": null,
+      "protectedPaths": [
+        "src/core",
+        "src/host",
+        "src/bootstrap",
+        "src/plugins/builtin",
+        "src/plugins/command-dir",
+        "src/plugins/command-stats",
+        "src/plugins/shape-box"
+      ],
+      "protectedDiffBytes": 0
+    },
+    {
+      "label": "box-A",
+      "commit": "921b6420b4452021a51e28a839fc02fd019090ff",
+      "parent": "969ca05f22f30a4e757065db5b6179428d09d4f1",
+      "newPlugins": [
+        "shape-box"
+      ],
+      "permittedAssemblyFile": "src/host/Runtime.ts",
+      "protectedPaths": [
+        "src/core",
+        "src/host",
+        "src/bootstrap",
+        "src/plugins/builtin",
+        "src/plugins/command-dir",
+        "src/plugins/command-stats"
+      ],
+      "protectedDiffBytes": 0
+    }
+  ],
+  "boxImplementationIdentical": true,
+  "note": "commands-B includes a generic build-manifest copy script and package build metadata; no runtime host/core/previous plugin changes"
+}

@@ -1,0 +1,14 @@
+dir
+init
+stats
+create g group
+create rect r 1 2 3 4 in group
+create circle c 5 6 7
+create text t 8 9 "统计"
+stats
+move r 1 1
+undo
+stats
+redo
+dir
+help

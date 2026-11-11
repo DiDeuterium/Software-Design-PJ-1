@@ -1,0 +1,42 @@
+svg-editor 0.1 — type 'help' for commands
+svg> canvas 800x600 created
+svg> box#n created (g#n + rect#n-rect + text#n-label)
+svg> saved to labels.svg (3 elements)
+svg> svg (800x600)
+└── g#n (box)
+    ├── rect#n-rect  x=120 y=100 w=160 h=60 fill=#4a90d9
+    └── text#n-label  (140,135) "开始"
+svg> box#n fill propagated to n-rect
+svg> box#n label updated: "处理数据 v2"
+svg> svg (800x600) *
+└── g#n (box)
+    ├── rect#n-rect  x=120 y=100 w=160 h=60 fill=#f5a623 *
+    └── text#n-label  (140,135) "处理数据 v2" *
+svg> box#n label restored: "开始"
+svg> svg (800x600) *
+└── g#n (box)
+    ├── rect#n-rect  x=120 y=100 w=160 h=60 fill=#f5a623 *
+    └── text#n-label  (140,135) "开始"
+svg> box#n label updated: "处理数据 v2"
+svg> svg (800x600) *
+└── g#n (box)
+    ├── rect#n-rect  x=120 y=100 w=160 h=60 fill=#f5a623 *
+    └── text#n-label  (140,135) "处理数据 v2" *
+svg> saved to labels.svg (3 elements)
+svg> svg (800x600)
+└── g#n (box)
+    ├── rect#n-rect  x=120 y=100 w=160 h=60 fill=#f5a623
+    └── text#n-label  (140,135) "处理数据 v2"
+svg> box#n moved by (10,20)
+svg> box#n moved back by (-10,-20)
+svg> svg (800x600)
+└── g#n (box)
+    ├── rect#n-rect  x=120 y=100 w=160 h=60 fill=#f5a623
+    └── text#n-label  (140,135) "处理数据 v2"
+svg> read labels.svg (3 elements)
+svg> rect: 1  text: 1  (total 2, containers 1)
+svg> svg (800x600)
+└── g#n (box)
+    ├── rect#n-rect  x=120 y=100 w=160 h=60 fill=#f5a623
+    └── text#n-label  (140,135) "处理数据 v2"
+svg> 

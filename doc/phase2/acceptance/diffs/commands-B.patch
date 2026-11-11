@@ -1,0 +1,378 @@
+diff --git a/README.md b/README.md
+index c70df9a..c9b39e2 100644
+--- a/README.md
++++ b/README.md
+@@ -111,7 +111,7 @@ npm run build
+ 
+ 第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
+ 
+-步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 已按代码提交 cf0e544 重算。步骤4完成 [代码/配置双装配](doc/phase2/assembly/README.md)，可通过 `npm run cli -- --config plugins.config.json` 启动。下一步为步骤5的 stats/dir；正式 box 和树标签也尚未接入。
++步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 已按代码提交 cf0e544 重算。步骤4完成 [双装配](doc/phase2/assembly/README.md)，步骤5新增独立 [stats/dir 命令插件](doc/phase2/commands/README.md)。先 `npm run build`，再 `npm run cli -- --config plugins.config.json` 启用；不传配置仍保持原有能力。下一步为步骤6的 box。
+ 
+ ## 提交约定
+ 
+diff --git a/doc/README.md b/doc/README.md
+index 4520054..712a7ae 100644
+--- a/doc/README.md
++++ b/doc/README.md
+@@ -3,7 +3,9 @@
+ 
+ ## 架构方案
+ 
+-第一阶段 CLI 已交付；第二阶段已完成 VS Code 实践、步骤2公开契约与 ADR、步骤3框架迁移及步骤4双装配。默认命令、六种图形和无标签输出保持第一阶段行为；正式可选插件待后续步骤。
++第一阶段 CLI 已交付；第二阶段已完成 VS Code 实践、步骤2公开契约与 ADR、步骤3框架迁移、步骤4双装配和步骤5命令插件。无配置时保留第一阶段默认能力；stats/dir 可通过配置独立启用，box 与正式树标签尚待接入。
++
++步骤5的 [命令与适配器记录](phase2/commands/README.md) 包含包路径、A/B 使用方式、目录端口的 Adapter 角色、特殊项策略及7项针对性验证。内核、宿主加载器和既有插件未修改；仅新增两个插件包、配置和构建清单复制支持。
+ 
+ 步骤4的配置格式、共享注册事务、模块解析、失败恢复与10项针对性验证见 [双装配记录](phase2/assembly/README.md)。加载器位于宿主侧，不导入具体插件；内核与既有插件本轮没有变更。步骤3指标已固定到 cf0e544，后续最终指标仍须按最终代码 SHA 生成。
+ 
+diff --git a/doc/phase2/commands/README.md b/doc/phase2/commands/README.md
+new file mode 100644
+index 0000000..e0cbbfc
+--- /dev/null
++++ b/doc/phase2/commands/README.md
+@@ -0,0 +1,62 @@
++# 步骤5：stats 与 dir 命令插件
++
++日期：2026-11-10。步骤4提交60e0f23已推送。本步骤尚未提交；不移动 final。
++
++## 包与装配
++
++两个包分别位于 src/plugins/command-stats 与 src/plugins/command-dir，均包含命令类、默认导出的插件类及声明 contributes.commands 的 package.json。它们仅依赖 core/public，不依赖内置命令表、其他插件或宿主实现。
++
++构建新增 scripts/CopyPluginManifests.mjs：通用复制 src/plugins 下的 package.json 到 dist 对应位置，不解释插件名、不参与 CLI 运行。package.json 的 build 脚本因此增加复制步骤，属于构建元数据支持；内核、加载器、组合根和既有插件均无改动。插件入口为各包的 StatsPlugin.js / DirPlugin.js。
++
++配置装配：
++
++```powershell
++npm run build
++node dist/bootstrap/main.js --config plugins.config.json
++```
++
++根配置按 stats、dir 顺序引用 ./dist/plugins/command-stats 与 ./dist/plugins/command-dir。可单独移除或设置 enabled:false。无 --config 时仍保持原有默认能力，不加载这两个命令；未加载时不进入 help，执行报 error: unknown command: stats/dir。源码启动也须先构建供配置引用的插件文件，再执行 npm run cli -- --config plugins.config.json。
++
++代码装配示例（在仓库根的 ESM 脚本中）：
++
++```js
++import { createRuntime } from './dist/host/Runtime.js';
++import StatsPlugin from './dist/plugins/command-stats/StatsPlugin.js';
++import DirPlugin from './dist/plugins/command-dir/DirPlugin.js';
++const runtime = await createRuntime({ plugins: [
++  { manifest: { name: '@svgframe/plugin-command-stats', contributes: { commands: ['stats'] } }, plugin: new StatsPlugin() },
++  { manifest: { name: '@svgframe/plugin-command-dir', contributes: { commands: ['dir'] } }, plugin: new DirPlugin() }
++] });
++console.log((await runtime.dispatcher.dispatch('dir')).message);
++```
++
++A/B 都调用既有 PluginRegistry 注册事务，命令实现相同，dir 同样从 context.services.directory 取得目录端口；不另造一套注册或 IO 路径。正式接入提交差异的 A/B 分支举证仍在步骤8统一整理，不把本工作树记录冒充最终提交证据。
++
++## stats 规则
++
++StatsCommand.run 不接受参数，通过 Session.query 获取只读文档。从根的子项依次深度优先遍历；isContainer 节点只计 containers，其孩子继续统计；叶子按 type 在 Map 中累计，输出顺序为首次出现顺序，根 SVG 不计数。该协议同样适用于未来 box，无需预先判断 box 名称。空文档为 (total 0, containers 0)；无文档沿用原错误。输出示例：rect: 3  circle: 1  text: 2  (total 6, containers 2)。
++
++## dir 与 Adapter 对应
++
++| 角色 | 接口/类 | 责任 |
++| --- | --- | --- |
++| Client | DirCommand | 参数、分类、稳定排序和行输出；不调用 Node fs |
++| Target | core/public/Plugin.ts 的 DirectoryReader、DirectoryEntry | read(path) 返回 name 与 directory/file/other |
++| Adapter | host/filesystem/LocalDirectoryReader | 既有宿主适配器，把 readdir 的 Dirent 转成公开条目 |
++| Adaptee | node:fs/promises.readdir | 实际读取直接子项，不递归 |
++
++目标路径为 CommandContext.workingDirectory，即宿主记录的进程工作目录，不是 SVG 路径；read/save 不改变它。目录在前、文件在后，各组按 JS 字符串比较（UTF-16 码元顺序）升序，避免受机器 locale 影响。隐藏项保留，. 和 .. 排除。特殊项（含符号链接）排在文件后，显示 [OTHER]，不遍历目标。标签后统一两个空格；空目录显示 (empty directory)。读取失败抛出 cannot read directory: &lt;path&gt;，REPL 添加 error: 并继续接收命令。
++
++dir 无需 SVG 文档；stats 与 dir 均通过 query 执行，不进入历史、不触发文档屏障、不发送提交事件，不改变文档/路径/dirty 基线。失败也保持原状态。
++
++## 针对性验证
++
++类型检查、生产构建和 tests/plugins/Commands.test.ts 的7项测试通过：
++
++- stats 独立使用会话/模型替身，覆盖嵌套容器、复合类型、首次出现顺序、空文档、无文档和参数错误。
++- dir 注入 DirectoryReader 替身，覆盖混合条目、隐藏项、特殊项、稳定排序、空目录、失败和参数拒绝。
++- 各插件独立启用与帮助注册；未启用另一插件时报告未知命令。
++- 实际会话中统计和目录查询成功/失败均保留内容、路径、undo/redo、屏障及提交事件；read/save 后仍读取原工作目录。
++- 真实临时目录与已有适配器组合，A/B 使用相同目录、顺序与同一命令实现，原始 REPL Buffer 与退出码一致。配置和输出存于被列举目录之外，目录内容全程固定。
++
++本轮不重复全量回归、六组第一阶段基线或 VS Code 验收。框架内部没有变更；指标仍保持步骤3历史快照，后续按收尾代码 SHA 更新。下一步为步骤6的 box 插件接入。
+diff --git a/package.json b/package.json
+index 9f6bf7d..bdfdfae 100644
+--- a/package.json
++++ b/package.json
+@@ -11,7 +11,7 @@
+   "scripts": {
+     "cli": "tsx src/bootstrap/main.ts",
+     "start": "node dist/bootstrap/main.js",
+-    "build": "tsc -p tsconfig.build.json",
++    "build": "tsc -p tsconfig.build.json && node scripts/CopyPluginManifests.mjs",
+     "typecheck": "tsc --noEmit -p tsconfig.json",
+     "test": "vitest run",
+     "test:watch": "vitest",
+diff --git a/plugins.config.json b/plugins.config.json
+index a5b818f..8fc14b9 100644
+--- a/plugins.config.json
++++ b/plugins.config.json
+@@ -1,3 +1,6 @@
+ {
+-  "plugins": []
++  "plugins": [
++    { "module": "./dist/plugins/command-stats" },
++    { "module": "./dist/plugins/command-dir" }
++  ]
+ }
+diff --git a/scripts/CopyPluginManifests.mjs b/scripts/CopyPluginManifests.mjs
+new file mode 100644
+index 0000000..2641968
+--- /dev/null
++++ b/scripts/CopyPluginManifests.mjs
+@@ -0,0 +1,15 @@
++import { readdir, mkdir, copyFile } from 'node:fs/promises';
++import { join } from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++// Build metadata only: keep each compiled plugin's manifest beside its entry.
++async function copy(source, target) {
++  for (const entry of await readdir(source, { withFileTypes: true })) {
++    if (entry.isDirectory()) await copy(join(source, entry.name), join(target, entry.name));
++    else if (entry.name === 'package.json') {
++      await mkdir(target, { recursive: true });
++      await copyFile(join(source, entry.name), join(target, entry.name));
++    }
++  }
++}
++await copy(fileURLToPath(new URL('../src/plugins/', import.meta.url)), fileURLToPath(new URL('../dist/plugins/', import.meta.url)));
+diff --git a/src/plugins/command-dir/DirCommand.ts b/src/plugins/command-dir/DirCommand.ts
+new file mode 100644
+index 0000000..cd10487
+--- /dev/null
++++ b/src/plugins/command-dir/DirCommand.ts
+@@ -0,0 +1,24 @@
++import type { Command, CommandContext, CommandToken } from '../../core/public/Command.js';
++import type { CommandOutput } from '../../core/public/Session.js';
++import type { DirectoryReader, DirectoryEntry } from '../../core/public/Plugin.js';
++
++export class DirCommand implements Command {
++  public constructor(private readonly directory: DirectoryReader) {}
++  public get name(): string { return 'dir'; }
++  public get syntax(): string { return 'dir'; }
++  public get help(): readonly string[] { return ['  dir                          list the process working directory']; }
++  public async run(tokens: readonly CommandToken[], context: CommandContext): Promise<CommandOutput> {
++    if (tokens.length !== 0) throw new Error('invalid arguments. usage: dir');
++    return context.session.query(async () => {
++      let entries: readonly DirectoryEntry[];
++      try { entries = await this.directory.read(context.workingDirectory); }
++      catch { throw new Error(`cannot read directory: ${context.workingDirectory}`); }
++      const rank = { directory: 0, file: 1, other: 2 };
++      const sorted = entries.filter(entry => entry.name !== '.' && entry.name !== '..').sort((a, b) =>
++        rank[a.kind] - rank[b.kind] || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
++      const tags = { directory: 'DIR', file: 'FILE', other: 'OTHER' };
++      return { message: sorted.length === 0 ? '(empty directory)' :
++        sorted.map(entry => `[${tags[entry.kind]}]  ${entry.name}`).join('\n') };
++    });
++  }
++}
+diff --git a/src/plugins/command-dir/DirPlugin.ts b/src/plugins/command-dir/DirPlugin.ts
+new file mode 100644
+index 0000000..aa68a6c
+--- /dev/null
++++ b/src/plugins/command-dir/DirPlugin.ts
+@@ -0,0 +1,6 @@
++import type { Plugin, PluginContext } from '../../core/public/Plugin.js';
++import { DirCommand } from './DirCommand.js';
++
++export default class DirPlugin implements Plugin {
++  public activate(context: PluginContext): void { context.registerCommand(new DirCommand(context.services.directory)); }
++}
+diff --git a/src/plugins/command-dir/package.json b/src/plugins/command-dir/package.json
+new file mode 100644
+index 0000000..5b2b64c
+--- /dev/null
++++ b/src/plugins/command-dir/package.json
+@@ -0,0 +1,6 @@
++{
++  "name": "@svgframe/plugin-command-dir",
++  "type": "module",
++  "main": "./DirPlugin.js",
++  "contributes": { "commands": ["dir"] }
++}
+diff --git a/src/plugins/command-stats/StatsCommand.ts b/src/plugins/command-stats/StatsCommand.ts
+new file mode 100644
+index 0000000..794063a
+--- /dev/null
++++ b/src/plugins/command-stats/StatsCommand.ts
+@@ -0,0 +1,24 @@
++import type { Command, CommandContext, CommandToken } from '../../core/public/Command.js';
++import type { CommandOutput } from '../../core/public/Session.js';
++import type { ShapeView } from '../../core/public/Shape.js';
++
++export class StatsCommand implements Command {
++  public get name(): string { return 'stats'; }
++  public get syntax(): string { return 'stats'; }
++  public get help(): readonly string[] { return ['  stats                        count leaves by type and containers']; }
++  public async run(tokens: readonly CommandToken[], context: CommandContext): Promise<CommandOutput> {
++    if (tokens.length !== 0) throw new Error('invalid arguments. usage: stats');
++    return context.session.query(state => {
++      if (state.document === undefined) throw new Error("no document. use 'init' or 'read' first");
++      const counts = new Map<string, number>(); let total = 0; let containers = 0;
++      const visit = (shape: ShapeView): void => {
++        if (shape.isContainer) containers++;
++        else { counts.set(shape.type, (counts.get(shape.type) ?? 0) + 1); total++; }
++        shape.children.forEach(visit);
++      };
++      state.document.roots.forEach(visit);
++      const types = [...counts].map(([type, count]) => `${type}: ${count}`).join('  ');
++      return { message: `${types}${types.length === 0 ? '' : '  '}(total ${total}, containers ${containers})` };
++    });
++  }
++}
+diff --git a/src/plugins/command-stats/StatsPlugin.ts b/src/plugins/command-stats/StatsPlugin.ts
+new file mode 100644
+index 0000000..b4c978f
+--- /dev/null
++++ b/src/plugins/command-stats/StatsPlugin.ts
+@@ -0,0 +1,6 @@
++import type { Plugin, PluginContext } from '../../core/public/Plugin.js';
++import { StatsCommand } from './StatsCommand.js';
++
++export default class StatsPlugin implements Plugin {
++  public activate(context: PluginContext): void { context.registerCommand(new StatsCommand()); }
++}
+diff --git a/src/plugins/command-stats/package.json b/src/plugins/command-stats/package.json
+new file mode 100644
+index 0000000..9a46f0f
+--- /dev/null
++++ b/src/plugins/command-stats/package.json
+@@ -0,0 +1,6 @@
++{
++  "name": "@svgframe/plugin-command-stats",
++  "type": "module",
++  "main": "./StatsPlugin.js",
++  "contributes": { "commands": ["stats"] }
++}
+diff --git a/tests/plugins/Commands.test.ts b/tests/plugins/Commands.test.ts
+new file mode 100644
+index 0000000..ff4ca0a
+--- /dev/null
++++ b/tests/plugins/Commands.test.ts
+@@ -0,0 +1,122 @@
++import { describe, expect, it } from 'vitest';
++import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
++import { join, resolve, dirname, basename } from 'node:path';
++import { Readable, Writable } from 'node:stream';
++import { StatsCommand } from '../../src/plugins/command-stats/StatsCommand.js';
++import StatsPlugin from '../../src/plugins/command-stats/StatsPlugin.js';
++import { DirCommand } from '../../src/plugins/command-dir/DirCommand.js';
++import DirPlugin from '../../src/plugins/command-dir/DirPlugin.js';
++import type { CommandContext } from '../../src/core/public/Command.js';
++import type { DirectoryReader, DirectoryEntry } from '../../src/core/public/Plugin.js';
++import { AttributeDispatcher } from '../../src/core/attributes/AttributeDispatcher.js';
++import { ContractSession } from '../core/fixtures/ContractSession.js';
++import { ContractDocument } from '../core/fixtures/ContractDocument.js';
++import { ContractShape } from '../core/fixtures/ContractShape.js';
++import { MemoryFiles } from '../core/fixtures/MemoryFiles.js';
++import { RecordingDecorator } from '../core/fixtures/RecordingDecorator.js';
++import { SamplePlugin } from '../core/fixtures/SamplePlugin.js';
++import { createRuntime } from '../../src/host/Runtime.js';
++import { Repl } from '../../src/host/Repl.js';
++
++const manifest = (name: string) => ({ name: `@svgframe/plugin-command-${name}`, contributes: { commands: [name] } });
++const context = (session = new ContractSession()): CommandContext => ({ session, workingDirectory: '/fixed',
++  extensions: { shapes: [], commands: [], attributes: [], decorators: [] }, attributes: new AttributeDispatcher() });
++
++describe('independent command plugins', () => {
++  it('stats counts DFS leaves in first-seen order, including children of an arbitrary composite', async () => {
++    const leaf = (id: string, type: string) => new ContractShape(id, type);
++    const document = new ContractDocument([
++      new ContractShape('g', 'g', [], [leaf('r1', 'rect'), leaf('c', 'circle'), leaf('r2', 'rect')], true),
++      new ContractShape('b', 'box', [], [leaf('r3', 'rect'), leaf('t1', 'text'), leaf('t2', 'text')], true),
++    ]);
++    const session = new ContractSession(document);
++    expect((await new StatsCommand().run([], context(session))).message).toBe('rect: 3  circle: 1  text: 2  (total 6, containers 2)');
++    expect(session.counts).toEqual([0, 0]);
++  });
++  it('stats handles empty documents and rejects missing documents and extra arguments', async () => {
++    const command = new StatsCommand();
++    expect((await command.run([], context(new ContractSession(new ContractDocument())))).message).toBe('(total 0, containers 0)');
++    await expect(command.run([], context())).rejects.toThrow('no document');
++    await expect(command.run([{ value: 'x', quoted: false }], context())).rejects.toThrow('usage: stats');
++  });
++  it('dir sorts directories/files/other deterministically, includes hidden names and does not mutate input', async () => {
++    const entries: readonly DirectoryEntry[] = Object.freeze([
++      { name: 'z', kind: 'file' }, { name: 'docs', kind: 'directory' }, { name: '.hidden', kind: 'file' },
++      { name: 'link', kind: 'other' }, { name: 'a', kind: 'directory' }, { name: '.', kind: 'directory' },
++      { name: '..', kind: 'directory' },
++    ]);
++    const paths: string[] = [];
++    const reader: DirectoryReader = { async read(path) { paths.push(path); return entries; } };
++    const command = new DirCommand(reader);
++    const expected = '[DIR]  a\n[DIR]  docs\n[FILE]  .hidden\n[FILE]  z\n[OTHER]  link';
++    expect((await command.run([], context())).message).toBe(expected);
++    expect((await command.run([], context())).message).toBe(expected);
++    expect(paths).toEqual(['/fixed', '/fixed']); expect(entries[0]!.name).toBe('z');
++  });
++  it('dir handles empty/read failures without a document, and rejects arguments before filesystem access', async () => {
++    expect((await new DirCommand({ read: async () => [] }).run([], context())).message).toBe('(empty directory)');
++    const command = new DirCommand({ read: async () => { throw new Error('denied'); } });
++    await expect(command.run([], context())).rejects.toThrow('cannot read directory: /fixed');
++    await expect(command.run([{ value: 'x', quoted: false }], context())).rejects.toThrow('usage: dir');
++  });
++});
++
++describe('registered commands and real adapter', () => {
++  it('can enable each command independently, with help and unknown-command defaults', async () => {
++    for (const name of ['stats', 'dir'] as const) {
++      const runtime = await createRuntime({ plugins: [{ manifest: manifest(name), plugin: name === 'stats' ? new StatsPlugin() : new DirPlugin() }] });
++      const help = (await runtime.dispatcher.dispatch('help'))!.message;
++      expect(help).toContain(`  ${name} `);
++      const other = name === 'stats' ? 'dir' : 'stats';
++      await expect(runtime.dispatcher.dispatch(other)).rejects.toThrow(`unknown command: ${other}`);
++    }
++  });
++  it('stats and successful/failed dir preserve document, path, history and commit events, including IO barriers', async () => {
++    let fail = false; const paths: string[] = [];
++    const reader: DirectoryReader = { async read(path) { paths.push(path); if (fail) throw new Error('denied'); return []; } };
++    const label = new RecordingDecorator('events', '*');
++    const runtime = await createRuntime({ files: new MemoryFiles(), workingDirectory: '/fixed', services: { directory: reader }, plugins: [
++      { manifest: manifest('dir'), plugin: new DirPlugin() }, { manifest: manifest('stats'), plugin: new StatsPlugin() },
++      { manifest: { name: 'events', contributes: { decorators: ['events'] } }, plugin: new SamplePlugin(ctx => ctx.registerDecorator(label)) },
++    ] });
++    const run = (line: string) => runtime.dispatcher.dispatch(line);
++    for (const line of ['init', 'create rect r 1 2 3 4', 'save elsewhere.svg', 'read elsewhere.svg']) await run(line);
++    const snapshot = () => JSON.stringify({ roots: runtime.session.state.document!.roots, path: runtime.session.state.path,
++      undo: runtime.session.undoCount, redo: runtime.session.redoCount, barrier: runtime.session.historyBlocked, events: label.events });
++    const barrier = snapshot(); await run('dir'); await run('stats'); expect(snapshot()).toBe(barrier);
++    for (const line of ['move r 1 1', 'undo']) await run(line);
++    const before = snapshot(); await run('dir'); await run('stats'); expect(snapshot()).toBe(before);
++    fail = true; await expect(run('dir')).rejects.toThrow('cannot read directory: /fixed'); expect(snapshot()).toBe(before);
++    fail = false; await run('redo'); expect(paths.every(path => path === '/fixed')).toBe(true);
++  });
++  it('combines the real filesystem adapter with both assemblies and compares raw REPL bytes in a fixed directory', async () => {
++    const temporary = await mkdtemp(join(process.cwd(), '.commands-test-'));
++    try {
++      const target = join(temporary, 'target'); await mkdir(target);
++      for (const name of ['zdir', 'adir']) await mkdir(join(target, name));
++      for (const name of ['z.txt', '.hidden']) await writeFile(join(target, name), 'fixed');
++      const file = join(temporary, 'plugins.config.json');
++      await writeFile(file, JSON.stringify({ plugins: [
++        { module: resolve('dist/plugins/command-stats') }, { module: resolve('dist/plugins/command-dir') },
++      ] }));
++      const a = await createRuntime({ workingDirectory: target, plugins: [
++        { manifest: manifest('stats'), plugin: new StatsPlugin() }, { manifest: manifest('dir'), plugin: new DirPlugin() },
++      ] });
++      const errors: string[] = [];
++      const b = await createRuntime({ workingDirectory: target, configFile: file, report: error => errors.push(error) });
++      expect(errors).toEqual([]);
++      expect((await a.dispatcher.dispatch('dir'))!.message).toBe('[DIR]  adir\n[DIR]  zdir\n[FILE]  .hidden\n[FILE]  z.txt');
++      const replay = async (runtime: typeof a) => {
++        const chunks: Buffer[] = [];
++        const output = new Writable({ write(chunk, _encoding, done) { chunks.push(Buffer.from(chunk)); done(); } });
++        const status = await new Repl(runtime.dispatcher, Readable.from(['dir\ninit\ncreate g g\ncreate rect r 1 2 3 4 in g\nstats\nhelp\n']), output).run();
++        return { bytes: Buffer.concat(chunks), status };
++      };
++      const left = await replay(a); const right = await replay(b);
++      expect(left.status).toBe(0); expect(right.status).toBe(left.status); expect(left.bytes.equals(right.bytes)).toBe(true);
++    } finally {
++      if (dirname(temporary) !== process.cwd() || !basename(temporary).startsWith('.commands-test-')) throw new Error('unexpected test directory');
++      await rm(temporary, { recursive: true, force: true });
++    }
++  });
++});

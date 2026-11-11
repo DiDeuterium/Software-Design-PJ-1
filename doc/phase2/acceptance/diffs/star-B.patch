@@ -1,0 +1,274 @@
+diff --git a/README.md b/README.md
+index 2c7e76f..d724cc6 100644
+--- a/README.md
++++ b/README.md
+@@ -90,7 +90,7 @@ npm run build
+ 
+ 也可执行 `npm run check` 连续完成上述三项，或用 `npm run test:watch` 进入测试监听。
+ 
+-当前22个测试文件、539项测试包含原520项回归、9项契约、9项生产框架贯通及1项指标口径测试。另用六组原始字节基线核验新编译入口。文件测试覆盖覆盖保存、临时写入/刷盘/替换失败、旧文件保留、默认路径和历史屏障。
++步骤3整套回归的22个测试文件、539项测试包含原520项回归、9项契约、9项生产框架贯通及1项指标口径测试，另用六组原始字节基线核验新入口。步骤4–7的加载器及插件按各自记录完成针对性验证，未在每步重复整套回归。文件测试覆盖覆盖保存、临时写入/刷盘/替换失败、旧文件保留、默认路径和历史屏障。
+ 
+ 完整课程会话和版本 A 的逐条验收、编译入口输出、SVG 产物及用户提供的预览截图见 [验收记录](doc/acceptance/README.md)。§6 会话包含两条预期错误，脚本退出码为 1，测试按预期错误和后续完整输出判断通过。
+ 
+@@ -111,7 +111,7 @@ npm run build
+ 
+ 第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
+ 
+-步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 已按代码提交 cf0e544 重算。步骤4完成 [双装配](doc/phase2/assembly/README.md)，步骤5新增 [stats/dir](doc/phase2/commands/README.md)，步骤6新增 [box复合图形与类型标签](doc/phase2/box/README.md)。先 `npm run build`，再 `npm run cli -- --config plugins.config.json` 启用；不传配置仍保持原有能力。下一步为步骤7的 modified-star。
++步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 已按代码提交 cf0e544 重算。步骤4完成 [双装配](doc/phase2/assembly/README.md)，步骤5新增 [stats/dir](doc/phase2/commands/README.md)，步骤6新增 [box](doc/phase2/box/README.md)，步骤7新增 [modified-star](doc/phase2/star/README.md)。先 `npm run build`，再 `npm run cli -- --config plugins.config.json` 启用；不传配置保持原有能力。下一步为步骤8的完整双装配验收与提交差异举证。
+ 
+ ## 提交约定
+ 
+diff --git a/doc/README.md b/doc/README.md
+index bfd11fc..3195da2 100644
+--- a/doc/README.md
++++ b/doc/README.md
+@@ -3,7 +3,9 @@
+ 
+ ## 架构方案
+ 
+-第一阶段 CLI 已交付；第二阶段已完成 VS Code 实践、步骤2契约与 ADR、步骤3框架、步骤4双装配、步骤5命令插件及步骤6复合图形。无配置时保留第一阶段能力；stats/dir/box 可通过配置启用，modified-star 尚待接入。
++第一阶段 CLI 已交付；第二阶段已完成 VS Code 实践、步骤2契约与 ADR、步骤3框架、步骤4双装配、步骤5命令、步骤6复合图形和步骤7星号标签。无配置时保留第一阶段能力；配置可启用 stats/dir/box/modified-star，完整统一验收与最终交付仍待步骤8–9。
++
++步骤7的 [星号记录](phase2/star/README.md) 落实 ADR-03：按保存基线比较内容，undo回保存点清星；子节点属性不向祖先传播，容器子项变化才标自身；根行比较整树。标签按注册顺序与 (box) 共存，基线为实例私有状态。5项针对性测试及类型检查/构建通过；内核和渲染器未修改。
+ 
+ 步骤6的 [box记录](phase2/box/README.md) 包含创建模板、必要部件保护、fill/label事务、读回降级、(box)标签和版本B双装配验证。插件独立成包，内核、加载器和既有插件的运行源码差异为空；通过既有公开协议完成接入，未反补框架分支。
+ 
+diff --git a/doc/phase2/star/README.md b/doc/phase2/star/README.md
+new file mode 100644
+index 0000000..9395095
+--- /dev/null
++++ b/doc/phase2/star/README.md
+@@ -0,0 +1,38 @@
++# 步骤7：modified-star 树标签
++
++日期：2026-11-10。步骤6提交 c2a83b6 已推送；本步骤尚未提交。
++
++## 接入与使用
++
++新增 src/plugins/tree-star 包：TreeStarPlugin 注册 ModifiedStarDecorator，package.json 声明 decorators:[modified-star]。仅依赖 core/public，不导入 box、渲染器或宿主实现。根配置在 box 后加载该包，因此同一行的标签为 (box) *；交换注册顺序则为 * (box)，两插件互不感知。
++
++```powershell
++npm run build
++node dist/bootstrap/main.js --config plugins.config.json
++```
++
++单独禁用 tree-star 项即可保留 (box) 而不显示星号。不传配置时所有可选标签均不加载，默认树不增加任何字符。代码装配同样使用 createRuntime 的 plugins 数组，插件实例为 new TreeStarPlugin()，清单为 `{name:'@svgframe/plugin-tree-star',contributes:{decorators:['modified-star']}}`。
++
++## 状态语义（落实 ADR-03）
++
++- 成功 init/read/save 时重建保存基线；失败操作没有成功事件，不重设基线。save-as 成功同样重建；路径本身不算图形内容。
++- 节点比较自身 id、type、容器标志、规范化属性和值，以及有序的直接子项 ID。属性键排序后比较，不把读回的属性排列变化当编辑；原属性数组不修改。
++- 新节点在保存基线中不存在，立即标 *。编辑恢复为原值或 undo 回保存点后星号消失，redo 再次偏离基线时恢复。成功的无内容变化命令不凭历史次数加星。
++- 子节点自身属性变化不传播给祖先。直接子项增删、重排属于容器自身变化，容器加星；根行比较画布尺寸、根项顺序和完整子树，任意内容差异均加星。删除节点不再有自己的行，由根行及直接父容器反映结构变化。
++- canvas 修改发送 edit，保留保存基线；不因文档类历史屏障而误当成保存。只读查询不修改基线。
++
++基线保存在标签实例的 savedNodes 和 savedDocument 私有字段，没有模块级可变状态。只持有内容签名，不保留可变模型引用。onCommit 只处理三类基线事件，labels 比较传入只读视图；不额外缓存当前文档或修改会话，渲染器只负责拼接标签。比较以内容为准，不依赖 XML 缩进、对象身份或外部文件字节。
++
++示例：保存 box 后执行 set n label "新标题"，text#n-label 行和 svg 根行加星，g#n (box) 行不自动加星。一次 undo 回到保存内容后，树恢复保存时状态，(box) 标签保留。
++
++## 验证及接入边界
++
++严格类型检查、生产构建与 tests/plugins/TreeStar.test.ts 的5项测试通过：
++
++1. 独立状态机覆盖 init、新建、编辑、保存、再编辑、undo、redo、read 重置。
++2. 自身/祖先规则、子项增删/排序、整树删除及画布尺寸差异。
++3. 属性顺序规范化与实例基线隔离。
++4. 实际会话中的 box 双标签、失败编辑/保存/读取、查询、保存点撤销、redo、save-as、无内容变化编辑及重新 init/read。
++5. 同实例实现的代码/配置装配结果一致、注册顺序，以及禁用星号后的无标签树 Buffer 与固定第一阶段格式一致。
++
++运行源码只新增 tree-star 包并修改配置；内核、宿主、加载器、渲染器和所有既有插件无改动，继续使用原清单复制构建步骤。可从接入前 c2a83b6 检查这些既有路径差异。本轮没有重复第一阶段全量回归或六组基线；全部场景与接入提交差异举证留在步骤8，最终指标和干净检出留在步骤9。
+diff --git a/plugins.config.json b/plugins.config.json
+index 9e117eb..d836456 100644
+--- a/plugins.config.json
++++ b/plugins.config.json
+@@ -2,6 +2,7 @@
+   "plugins": [
+     { "module": "./dist/plugins/command-stats" },
+     { "module": "./dist/plugins/command-dir" },
+-    { "module": "./dist/plugins/shape-box" }
++    { "module": "./dist/plugins/shape-box" },
++    { "module": "./dist/plugins/tree-star" }
+   ]
+ }
+diff --git a/src/plugins/tree-star/ModifiedStarDecorator.ts b/src/plugins/tree-star/ModifiedStarDecorator.ts
+new file mode 100644
+index 0000000..96177a2
+--- /dev/null
++++ b/src/plugins/tree-star/ModifiedStarDecorator.ts
+@@ -0,0 +1,35 @@
++import type { DocumentView } from '../../core/public/Document.js';
++import type { ShapeView } from '../../core/public/Shape.js';
++import type { TreeDecorator, TreeLine, SessionEvent } from '../../core/public/TreeDecorator.js';
++
++/** Content comparison against the last successful init/read/save, per instance. */
++export class ModifiedStarDecorator implements TreeDecorator {
++  private readonly savedNodes = new Map<string, string>();
++  private savedDocument: string | undefined;
++  public get name(): string { return 'modified-star'; }
++
++  public onCommit(event: SessionEvent): void {
++    if (event.kind !== 'init' && event.kind !== 'read' && event.kind !== 'save') return;
++    this.savedNodes.clear();
++    const visit = (shape: ShapeView): void => {
++      this.savedNodes.set(shape.id, this.ownContent(shape)); shape.children.forEach(visit);
++    };
++    event.document.roots.forEach(visit);
++    this.savedDocument = this.documentContent(event.document);
++  }
++
++  public labels(line: TreeLine): readonly string[] {
++    const changed = line.shape === undefined ? this.documentContent(line.document) !== this.savedDocument :
++      this.ownContent(line.shape) !== this.savedNodes.get(line.shape.id);
++    return changed ? ['*'] : [];
++  }
++
++  private ownContent(shape: ShapeView): string {
++    const attributes = [...shape.attributes].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
++    return JSON.stringify([shape.id, shape.type, shape.isContainer, attributes, shape.children.map(child => child.id)]);
++  }
++  private documentContent(document: DocumentView): string {
++    const subtree = (shape: ShapeView): unknown => [this.ownContent(shape), shape.children.map(subtree)];
++    return JSON.stringify([document.width, document.height, document.roots.map(subtree)]);
++  }
++}
+diff --git a/src/plugins/tree-star/TreeStarPlugin.ts b/src/plugins/tree-star/TreeStarPlugin.ts
+new file mode 100644
+index 0000000..1c48e38
+--- /dev/null
++++ b/src/plugins/tree-star/TreeStarPlugin.ts
+@@ -0,0 +1,6 @@
++import type { Plugin, PluginContext } from '../../core/public/Plugin.js';
++import { ModifiedStarDecorator } from './ModifiedStarDecorator.js';
++
++export default class TreeStarPlugin implements Plugin {
++  public activate(context: PluginContext): void { context.registerDecorator(new ModifiedStarDecorator()); }
++}
+diff --git a/src/plugins/tree-star/package.json b/src/plugins/tree-star/package.json
+new file mode 100644
+index 0000000..99923a8
+--- /dev/null
++++ b/src/plugins/tree-star/package.json
+@@ -0,0 +1,6 @@
++{
++  "name": "@svgframe/plugin-tree-star",
++  "type": "module",
++  "main": "./TreeStarPlugin.js",
++  "contributes": { "decorators": ["modified-star"] }
++}
+diff --git a/tests/plugins/TreeStar.test.ts b/tests/plugins/TreeStar.test.ts
+new file mode 100644
+index 0000000..ec92c67
+--- /dev/null
++++ b/tests/plugins/TreeStar.test.ts
+@@ -0,0 +1,109 @@
++import { describe, expect, it } from 'vitest';
++import { mkdtemp, writeFile, rm } from 'node:fs/promises';
++import { resolve, join, dirname, basename } from 'node:path';
++import { ModifiedStarDecorator } from '../../src/plugins/tree-star/ModifiedStarDecorator.js';
++import TreeStarPlugin from '../../src/plugins/tree-star/TreeStarPlugin.js';
++import BoxPlugin from '../../src/plugins/shape-box/BoxPlugin.js';
++import type { DocumentView } from '../../src/core/public/Document.js';
++import { ContractDocument } from '../core/fixtures/ContractDocument.js';
++import { ContractShape } from '../core/fixtures/ContractShape.js';
++import { createRuntime } from '../../src/host/Runtime.js';
++import { MemoryFiles } from '../core/fixtures/MemoryFiles.js';
++
++const starManifest = { name: '@svgframe/plugin-tree-star', contributes: { decorators: ['modified-star'] } };
++const boxManifest = { name: '@svgframe/plugin-shape-box', contributes: {
++  shapes: ['box'], attributes: ['box-fill', 'box-label'], decorators: ['box-type-label'],
++} };
++const labels = (star: ModifiedStarDecorator, document: DocumentView, id?: string) =>
++  star.labels({ document, shape: id === undefined ? undefined : document.getShape(id) });
++const leaf = (id: string, fill = 'red') => new ContractShape(id, 'rect', [['x', 1], ['fill', fill]]);
++const doc = (...roots: ContractShape[]) => new ContractDocument(roots).view();
++
++describe('modified-star independent state machine', () => {
++  it('compares content across init/new/edit/save/undo/redo/read rather than recording edit occurrence', () => {
++    const star = new ModifiedStarDecorator(); const empty = doc(); const red = doc(leaf('r')); const blue = doc(leaf('r', 'blue'));
++    star.onCommit({ kind: 'init', document: empty }); expect(labels(star, empty)).toEqual([]);
++    star.onCommit({ kind: 'edit', document: red }); expect(labels(star, red, 'r')).toEqual(['*']);
++    star.onCommit({ kind: 'save', document: red }); expect(labels(star, red)).toEqual([]);
++    star.onCommit({ kind: 'edit', document: blue }); expect(labels(star, blue, 'r')).toEqual(['*']);
++    star.onCommit({ kind: 'undo', document: red }); expect(labels(star, red, 'r')).toEqual([]);
++    star.onCommit({ kind: 'redo', document: blue }); expect(labels(star, blue)).toEqual(['*']);
++    star.onCommit({ kind: 'read', document: blue }); expect(labels(star, blue, 'r')).toEqual([]);
++    star.onCommit({ kind: 'init', document: empty }); expect(labels(star, empty)).toEqual([]);
++  });
++  it('marks direct structural changes but not ancestor propagation; root tracks all content and canvas changes', () => {
++    const group = (...children: ContractShape[]) => new ContractShape('g', 'g', [], children, true);
++    const before = doc(group(leaf('r'), leaf('s'))); const star = new ModifiedStarDecorator();
++    star.onCommit({ kind: 'save', document: before });
++    const changed = doc(group(leaf('r', 'blue'), leaf('s')));
++    expect(labels(star, changed, 'r')).toEqual(['*']); expect(labels(star, changed, 'g')).toEqual([]); expect(labels(star, changed)).toEqual(['*']);
++    for (const next of [doc(group(leaf('s'), leaf('r'))), doc(group(leaf('r'))), doc(group(leaf('r'), leaf('s'), leaf('new')))]) {
++      expect(labels(star, next, 'g')).toEqual(['*']); expect(labels(star, next)).toEqual(['*']);
++    }
++    expect(labels(star, { ...before, width: 900 })).toEqual(['*']);
++    expect(labels(star, { ...before, width: 900 }, 'g')).toEqual([]);
++    expect(labels(star, doc())).toEqual(['*']);
++  });
++  it('ignores attribute ordering and isolates baseline state between plugin instances', () => {
++    const before = doc(leaf('r')); const star = new ModifiedStarDecorator();
++    star.onCommit({ kind: 'save', document: before });
++    const reordered = doc(new ContractShape('r', 'rect', [['fill', 'red'], ['x', 1]]));
++    expect(labels(star, reordered)).toEqual([]); expect(labels(star, reordered, 'r')).toEqual([]);
++    const other = new ModifiedStarDecorator(); other.onCommit({ kind: 'init', document: doc() });
++    expect(labels(other, before, 'r')).toEqual(['*']); expect(labels(star, before, 'r')).toEqual([]);
++  });
++});
++
++describe('star lifecycle in the actual session', () => {
++  it('coexists with box and preserves dirty state across queries/errors, resetting only on successful IO/init', async () => {
++    const files = new MemoryFiles(); const runtime = await createRuntime({ files, plugins: [
++      { manifest: boxManifest, plugin: new BoxPlugin() }, { manifest: starManifest, plugin: new TreeStarPlugin() },
++    ] });
++    const run = (line: string) => runtime.dispatcher.dispatch(line);
++    const tree = async () => (await run('tree'))!.message;
++    await run('init'); expect(await tree()).toBe('svg (800x600)');
++    await run('create g outer'); await run('create box n 1 2 3 4 "before" in outer');
++    expect(await tree()).toContain('g#n (box) *');
++    await run('save base.svg'); const saved = await tree(); expect(saved).not.toContain('*');
++    await run('set n label "after"'); const dirty = await tree();
++    expect(dirty.split('\n')[0]).toBe('svg (800x600) *');
++    expect(dirty).toContain('g#n (box)\n'); expect(dirty).toContain('g#outer\n');
++    expect(dirty).toContain('"after" *');
++    const counts = [runtime.session.undoCount, runtime.session.redoCount];
++    await run('show n'); await run('help'); await expect(run('set n unknown bad')).rejects.toThrow();
++    files.failWrite = true; await expect(run('save failed.svg')).rejects.toThrow();
++    await expect(run('read absent.svg')).rejects.toThrow(); expect(await tree()).toBe(dirty);
++    expect([runtime.session.undoCount, runtime.session.redoCount]).toEqual(counts);
++    await run('undo'); expect(await tree()).toBe(saved); await run('redo'); expect(await tree()).toBe(dirty);
++    files.failWrite = false; await run('save renamed.svg'); expect(await tree()).not.toContain('*');
++    await run('set n label "after"'); expect(await tree()).not.toContain('*'); // successful no-op
++    await run('canvas 900 600'); expect((await tree()).split('\n')[0]).toBe('svg (900x600) *');
++    await run('read base.svg'); expect(await tree()).toBe(saved);
++    await run('init'); expect(await tree()).toBe('svg (800x600)');
++  });
++  it('loads the same decorator through config, uses registration order, and leaves disabled output untouched', async () => {
++    const temporary = await mkdtemp(join(process.cwd(), '.star-test-'));
++    try {
++      const file = join(temporary, 'plugins.config.json');
++      await writeFile(file, JSON.stringify({ plugins: [
++        { module: resolve('dist/plugins/tree-star') }, { module: resolve('dist/plugins/shape-box') },
++      ] }));
++      const errors: string[] = [];
++      const configured = await createRuntime({ configFile: file, report: message => errors.push(message) }); expect(errors).toEqual([]);
++      const coded = await createRuntime({ plugins: [
++        { manifest: starManifest, plugin: new TreeStarPlugin() }, { manifest: boxManifest, plugin: new BoxPlugin() },
++      ] });
++      for (const line of ['init', 'create box n 1 2 3 4 "text"', 'tree', 'undo', 'tree', 'redo', 'tree']) {
++        expect(JSON.stringify(await coded.dispatcher.dispatch(line))).toBe(JSON.stringify(await configured.dispatcher.dispatch(line)));
++      }
++      expect((await configured.dispatcher.dispatch('tree n'))!.message.split('\n')[0]).toBe('g#n * (box)');
++      await writeFile(file, JSON.stringify({ plugins: [{ module: resolve('dist/plugins/tree-star'), enabled: false }] }));
++      const plain = await createRuntime({ configFile: file });
++      await plain.dispatcher.dispatch('init'); await plain.dispatcher.dispatch('create rect r 1 2 3 4');
++      expect(Buffer.from((await plain.dispatcher.dispatch('tree'))!.message).equals(Buffer.from('svg (800x600)\n└── rect#r  x=1 y=2 w=3 h=4'))).toBe(true);
++    } finally {
++      if (dirname(temporary) !== process.cwd() || !basename(temporary).startsWith('.star-test-')) throw new Error('unexpected test directory');
++      await rm(temporary, { recursive: true, force: true });
++    }
++  });
++});

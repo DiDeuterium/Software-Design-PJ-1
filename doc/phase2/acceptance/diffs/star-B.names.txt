@@ -1,0 +1,8 @@
+M	README.md
+M	doc/README.md
+A	doc/phase2/star/README.md
+M	plugins.config.json
+A	src/plugins/tree-star/ModifiedStarDecorator.ts
+A	src/plugins/tree-star/TreeStarPlugin.ts
+A	src/plugins/tree-star/package.json
+A	tests/plugins/TreeStar.test.ts

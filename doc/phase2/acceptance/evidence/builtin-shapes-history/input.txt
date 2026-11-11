@@ -1,0 +1,36 @@
+init 400 300
+create g g
+create rect r 1 2 30 40 #abcdef in g
+create circle c 4 5 6 red in g
+create ellipse e 7 8 9 10
+create line l 1 2 3 4 black
+create text t 5 6 "中文 空格"
+create text empty 0 0 ""
+tree
+tree g
+show r
+show c
+show e
+show l
+show t
+show g
+canvas
+set t text "新文本"
+undo
+help
+tree
+redo
+move g 2 3
+scale g 2
+front r
+back r
+group pair e l
+addto g pair
+ungroup pair
+delete c
+undo
+redo
+tree
+save shapes.svg
+undo
+tree

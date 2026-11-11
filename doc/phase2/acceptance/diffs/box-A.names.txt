@@ -1,0 +1,9 @@
+M	src/host/Runtime.ts
+A	src/plugins/shape-box/BoxFillHandler.ts
+A	src/plugins/shape-box/BoxLabelHandler.ts
+A	src/plugins/shape-box/BoxPart.ts
+A	src/plugins/shape-box/BoxPlugin.ts
+A	src/plugins/shape-box/BoxProvider.ts
+A	src/plugins/shape-box/BoxShape.ts
+A	src/plugins/shape-box/BoxTypeDecorator.ts
+A	src/plugins/shape-box/package.json

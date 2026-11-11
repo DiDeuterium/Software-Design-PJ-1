@@ -1,0 +1,13 @@
+M	README.md
+M	doc/README.md
+A	doc/phase2/commands/README.md
+M	package.json
+M	plugins.config.json
+A	scripts/CopyPluginManifests.mjs
+A	src/plugins/command-dir/DirCommand.ts
+A	src/plugins/command-dir/DirPlugin.ts
+A	src/plugins/command-dir/package.json
+A	src/plugins/command-stats/StatsCommand.ts
+A	src/plugins/command-stats/StatsPlugin.ts
+A	src/plugins/command-stats/package.json
+A	tests/plugins/Commands.test.ts

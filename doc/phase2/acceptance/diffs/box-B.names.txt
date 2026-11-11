@@ -1,0 +1,14 @@
+M	README.md
+M	doc/README.md
+A	doc/phase2/box/README.md
+A	doc/transcript/flowchart-box.txt
+M	plugins.config.json
+A	src/plugins/shape-box/BoxFillHandler.ts
+A	src/plugins/shape-box/BoxLabelHandler.ts
+A	src/plugins/shape-box/BoxPart.ts
+A	src/plugins/shape-box/BoxPlugin.ts
+A	src/plugins/shape-box/BoxProvider.ts
+A	src/plugins/shape-box/BoxShape.ts
+A	src/plugins/shape-box/BoxTypeDecorator.ts
+A	src/plugins/shape-box/package.json
+A	tests/plugins/Box.test.ts

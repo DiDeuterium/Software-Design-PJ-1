@@ -1,0 +1,19 @@
+init
+create box n 120 100 160 60 "开始"
+save labels.svg
+tree
+set n fill #f5a623
+set n label "处理数据 v2"
+tree
+undo
+tree
+redo
+tree
+save
+tree
+move n 10 20
+undo
+tree
+read labels.svg
+stats
+tree

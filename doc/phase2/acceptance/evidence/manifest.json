@@ -1,0 +1,164 @@
+{
+  "codeRevision": "4e8e80d86fb8ee683be04083bc033c70f1f74142",
+  "final": "251127e69abb2512dc787efe6a92dd30ab9514d4",
+  "historicalA": "921b6420b4452021a51e28a839fc02fd019090ff",
+  "historicalB": "c2a83b63dbaada29bd0aeed3445147c1d23b0cdf",
+  "plugins": [
+    "stats",
+    "dir",
+    "box",
+    "modified-star"
+  ],
+  "options": null,
+  "comparison": "raw Buffers; identical cwd and initial files; output outside cwd",
+  "scenarios": [
+    {
+      "name": "builtin-cli-1",
+      "profile": "builtin",
+      "exitCode": 1,
+      "inputSha256": "fab867ec405a4c7c2d9a8dcc39dd677b27e38170dc5b28c3acd6020ffd172b90",
+      "stdoutSha256": "f10db543aca051183cbc5a2e445fbcb3738b76819d2b4124fdc6b673342e2486",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "demo.svg",
+          "sha256": "7ce8f300aae3599973f3650febaabdc48901160c9b1d5734522c45dfab7868be"
+        }
+      ]
+    },
+    {
+      "name": "builtin-flowchart-a",
+      "profile": "builtin",
+      "exitCode": 0,
+      "inputSha256": "83c7bc9484dbce645a9ce19dedb62cd69e2741ff6e1f988f4af1b8f63762665e",
+      "stdoutSha256": "0a07529b0da97c9788097612e6aaecd4fc6ead66214c6c8dd5b0a80b59cd2294",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "flowchart.svg",
+          "sha256": "8bc34757cc066d93b5a897df84e077134cf0db7e47b113b90e6b15ecf10c4cd8"
+        }
+      ]
+    },
+    {
+      "name": "builtin-help",
+      "profile": "builtin",
+      "exitCode": 0,
+      "inputSha256": "41ae84877dd3ce346a7d97fc7f493c8e9dcacfa67ce6974ace56baecee9a8411",
+      "stdoutSha256": "9ba5ed2c739aebe4c36a69a984ca8d3018f30d64edaaefcaa5df8e698ab435f4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": []
+    },
+    {
+      "name": "builtin-empty",
+      "profile": "builtin",
+      "exitCode": 0,
+      "inputSha256": "2ac07545c1b954561e4b9cf9e47aae62405a4c64e48d0d4e78ad68aeb5747ffa",
+      "stdoutSha256": "0624724ff831b8f916018d2b63434ef70b872ea78ec9f138e38cdfe2e9621f9d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": []
+    },
+    {
+      "name": "builtin-no-document",
+      "profile": "builtin",
+      "exitCode": 1,
+      "inputSha256": "037e41681b2dd45fef14ac2c51cfef000c4339d9e78b5f7ac9d1036eff566ee3",
+      "stdoutSha256": "d6470058b9414689496546ab0a14cb3156afd733d24e899ebbd7bde2f6745bfc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": []
+    },
+    {
+      "name": "builtin-shapes-history",
+      "profile": "builtin",
+      "exitCode": 1,
+      "inputSha256": "8b231f7269f744021dc077cb9db12025faa2b361ec4d4e1e1cfac3999aca4e9c",
+      "stdoutSha256": "2c5d3e41a88337c28a4c3ab02dbb1e71801e67a2743b4e1cf1524cc0e4099fcc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "shapes.svg",
+          "sha256": "fb3c84ce71f4bc01bea946e3d41e90d3271e5b83968ef66767a9e7a25ab71b20"
+        }
+      ]
+    },
+    {
+      "name": "full-cli-1",
+      "profile": "full",
+      "exitCode": 1,
+      "inputSha256": "fab867ec405a4c7c2d9a8dcc39dd677b27e38170dc5b28c3acd6020ffd172b90",
+      "stdoutSha256": "11d86e9c7573c1c4b66f79e16d747eae20c62d386fbf2e9608d30d5422816cf4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "demo.svg",
+          "sha256": "7ce8f300aae3599973f3650febaabdc48901160c9b1d5734522c45dfab7868be"
+        }
+      ]
+    },
+    {
+      "name": "full-flowchart-a",
+      "profile": "full",
+      "exitCode": 0,
+      "inputSha256": "83c7bc9484dbce645a9ce19dedb62cd69e2741ff6e1f988f4af1b8f63762665e",
+      "stdoutSha256": "b500c47350171aaec605b128e844c64539cdf69b098321887b062e27d6333da0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "flowchart.svg",
+          "sha256": "8bc34757cc066d93b5a897df84e077134cf0db7e47b113b90e6b15ecf10c4cd8"
+        }
+      ]
+    },
+    {
+      "name": "full-flowchart-box",
+      "profile": "full",
+      "exitCode": 0,
+      "inputSha256": "ad28ba7b05f70e998a57530fc8cf84ac91492a776dcce708942f4284486b7d07",
+      "stdoutSha256": "199f4e4355d26bae2501be98e45838dd7b305491342b41d043cd91ef50d659d9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "flowchart-box.svg",
+          "sha256": "746e10d9af7eb5c483d98e51dc5a325f40d933c3e9e91f567ef0a33b18cd9b56"
+        }
+      ]
+    },
+    {
+      "name": "full-commands",
+      "profile": "full",
+      "exitCode": 0,
+      "inputSha256": "4009c84787014cdf7d29c1557121af4e9c276c24d31b5324d164b466bd46061a",
+      "stdoutSha256": "e897778f9831a1008fd5bbdce23bd5febb54c66af7f1496fd97ab5fe505dd76c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": []
+    },
+    {
+      "name": "full-labels-history",
+      "profile": "full",
+      "exitCode": 0,
+      "inputSha256": "da61afdda7e306b5eebce71835235002078d0340c8522c1cc5e44eef699229d8",
+      "stdoutSha256": "fbaa775b6395d04226208fbe67edaa2a5ba3e2f39c18868ce3c72361408aac67",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "labels.svg",
+          "sha256": "71c2f56b0fbe17605877a28b1766b01c128a3200f692296b45ed29a7f94eaa9f"
+        }
+      ]
+    },
+    {
+      "name": "historical-box-A-B",
+      "profile": "historical",
+      "exitCode": 0,
+      "inputSha256": "ad28ba7b05f70e998a57530fc8cf84ac91492a776dcce708942f4284486b7d07",
+      "stdoutSha256": "4a67d721b89a99eb780d7e4c1fd2acdf1fd770e98d9b34f9dd5f54f9fd8cc6e6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifacts": [
+        {
+          "name": "flowchart-box.svg",
+          "sha256": "746e10d9af7eb5c483d98e51dc5a325f40d933c3e9e91f567ef0a33b18cd9b56"
+        }
+      ]
+    }
+  ]
+}

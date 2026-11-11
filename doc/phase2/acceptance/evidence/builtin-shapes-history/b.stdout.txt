@@ -1,0 +1,100 @@
+svg-editor 0.1 — type 'help' for commands
+svg> canvas 400x300 created
+svg> g#g created
+svg> rect#r created in g#g
+svg> circle#c created in g#g
+svg> ellipse#e created
+svg> line#l created
+svg> text#t created
+svg> text#empty created
+svg> svg (400x300)
+├── g#g
+│   ├── rect#r  x=1 y=2 w=30 h=40 fill=#abcdef
+│   └── circle#c  cx=4 cy=5 r=6 fill=red
+├── ellipse#e  cx=7 cy=8 rx=9 ry=10
+├── line#l  (1,2) -> (3,4) stroke=black
+├── text#t  (5,6) "中文 空格"
+└── text#empty  (0,0) ""
+svg> g#g
+├── rect#r  x=1 y=2 w=30 h=40 fill=#abcdef
+└── circle#c  cx=4 cy=5 r=6 fill=red
+svg> rect#r  parent=g#g
+  x=1 y=2 width=30 height=40
+  fill=#abcdef
+svg> circle#c  parent=g#g
+  cx=4 cy=5 r=6
+  fill=red
+svg> ellipse#e  parent=svg
+  cx=7 cy=8 rx=9 ry=10
+svg> line#l  parent=svg
+  x1=1 y1=2 x2=3 y2=4
+  stroke=black
+svg> text#t  parent=svg
+  x=5 y=6 text="中文 空格"
+svg> g#g  parent=svg
+  children=2
+svg> canvas 400x300
+svg> text#t updated: text="新文本"
+svg> text#t updated: text="中文 空格"
+svg> Document:
+  init [w] [h]                 defaults: 800x600; omitted h: 600
+  canvas [w] [h]               query or resize; omitted h: current height
+  read <file.svg>               replace document; remember path
+  save [file.svg]               overwrite; default: last read/save path
+Edit:
+  create <type> <id> [params] [in <containerId>]
+    rect <id> <x> <y> <w> <h> [fill]
+    circle <id> <cx> <cy> <r> [fill]
+    ellipse <id> <cx> <cy> <rx> <ry> [fill]
+    line <id> <x1> <y1> <x2> <y2> [stroke]
+    text <id> <x> <y> "content"
+    g <id>
+  delete <id>
+  move <id> <dx> <dy>
+  scale <id> <factor>
+  set <id> <attr> <value>
+  group <newGid> <id1> <id2>...
+  ungroup <gid>
+  addto <gid> <id>
+  front <id> / back <id>
+Display and history:
+  tree [id] / show <id> / help / undo / redo
+Whole-line # comments only; colors such as #ffffff are values.
+Double-quoted arguments support escaped quotes and backslashes.
+EOF or Ctrl+C exits. Successful init/read/save/resize blocks undo/redo until the next edit.
+svg> svg (400x300)
+├── g#g
+│   ├── rect#r  x=1 y=2 w=30 h=40 fill=#abcdef
+│   └── circle#c  cx=4 cy=5 r=6 fill=red
+├── ellipse#e  cx=7 cy=8 rx=9 ry=10
+├── line#l  (1,2) -> (3,4) stroke=black
+├── text#t  (5,6) "中文 空格"
+└── text#empty  (0,0) ""
+svg> text#t updated: text="新文本"
+svg> g#g moved by (2,3)
+svg> g#g scaled by 2
+svg> rect#r moved to front
+svg> rect#r moved to back
+svg> g#pair created with 2 children
+svg> g#pair moved into g#g
+svg> g#pair ungrouped; 2 children promoted to g#g
+svg> circle#c deleted
+svg> circle#c restored into g#g
+svg> circle#c deleted
+svg> svg (400x300)
+├── g#g
+│   ├── rect#r  x=6 y=10 w=60 h=80 fill=#abcdef
+│   ├── ellipse#e  cx=7 cy=8 rx=9 ry=10
+│   └── line#l  (1,2) -> (3,4) stroke=black
+├── text#t  (5,6) "新文本"
+└── text#empty  (0,0) ""
+svg> saved to shapes.svg (6 elements)
+svg> error: undo not allowed after io command
+svg> svg (400x300)
+├── g#g
+│   ├── rect#r  x=6 y=10 w=60 h=80 fill=#abcdef
+│   ├── ellipse#e  cx=7 cy=8 rx=9 ry=10
+│   └── line#l  (1,2) -> (3,4) stroke=black
+├── text#t  (5,6) "新文本"
+└── text#empty  (0,0) ""
+svg> 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <g id="g">
+    <rect id="r" x="6" y="10" width="60" height="80" fill="#abcdef"/>
+    <ellipse id="e" cx="7" cy="8" rx="9" ry="10"/>
+    <line id="l" x1="1" y1="2" x2="3" y2="4" stroke="black"/>
+  </g>
+  <text id="t" x="5" y="6">新文本</text>
+  <text id="empty" x="0" y="0"></text>
+</svg>

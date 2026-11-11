@@ -1,0 +1,240 @@
+diff --git a/src/host/Runtime.ts b/src/host/Runtime.ts
+index 34bfc18..0cf6aa0 100644
+--- a/src/host/Runtime.ts
++++ b/src/host/Runtime.ts
+@@ -13,6 +13,7 @@ import { BuiltinPlugin } from '../plugins/builtin/BuiltinPlugin.js';
+ import { LocalFileStore } from './filesystem/LocalFileStore.js';
+ import { LocalDirectoryReader } from './filesystem/LocalDirectoryReader.js';
+ import { PluginLoader } from './plugins/PluginLoader.js';
++import BoxPlugin from '../plugins/shape-box/BoxPlugin.js';
+ 
+ export interface RuntimeOptions {
+   readonly configFile?: string;
+@@ -36,6 +37,9 @@ export async function createRuntime(options: RuntimeOptions = {}) {
+   if (options.builtins !== false) await registry.activate(BuiltinPlugin.manifest,
+     new BuiltinPlugin(options.files ?? new LocalFileStore(), codec, new DocumentFactory(), presentation, shapes));
+   const loader = new PluginLoader(registry, options.report ?? (() => undefined));
++  await loader.activate({ name: '@svgframe/plugin-shape-box', contributes: {
++    shapes: ['box'], attributes: ['box-fill', 'box-label'], decorators: ['box-type-label'],
++  } }, new BoxPlugin());
+   for (const entry of options.plugins ?? []) await loader.activate(entry.manifest, entry.plugin, entry.options);
+   if (options.configFile !== undefined) await loader.loadConfig(options.configFile);
+   const workingDirectory = options.workingDirectory ?? process.cwd();
+diff --git a/src/plugins/shape-box/BoxFillHandler.ts b/src/plugins/shape-box/BoxFillHandler.ts
+new file mode 100644
+index 0000000..f9aad1f
+--- /dev/null
++++ b/src/plugins/shape-box/BoxFillHandler.ts
+@@ -0,0 +1,13 @@
++import type { AttributeHandler, AttributeContext, AttributeChange } from '../../core/public/AttributeHandler.js';
++import type { AttributeValue, ShapeView } from '../../core/public/Shape.js';
++
++export class BoxFillHandler implements AttributeHandler {
++  public get name(): string { return 'box-fill'; }
++  public handles(shape: ShapeView, attribute: string): boolean { return shape.type === 'box' && attribute === 'fill'; }
++  public apply(context: AttributeContext, _attribute: string, value: AttributeValue): AttributeChange {
++    const part = context.document.getShape(`${context.target.id}-rect`); const before = part.getAttribute('fill');
++    part.set('fill', value);
++    return { before, after: part.getAttribute('fill'), message: `box#${context.target.id} fill propagated to ${part.id}`,
++      undoMessage: `box#${context.target.id} fill restored: ${before === undefined ? '(unset)' : before}` };
++  }
++}
+diff --git a/src/plugins/shape-box/BoxLabelHandler.ts b/src/plugins/shape-box/BoxLabelHandler.ts
+new file mode 100644
+index 0000000..5d4682e
+--- /dev/null
++++ b/src/plugins/shape-box/BoxLabelHandler.ts
+@@ -0,0 +1,13 @@
++import type { AttributeHandler, AttributeContext, AttributeChange } from '../../core/public/AttributeHandler.js';
++import type { AttributeValue, ShapeView } from '../../core/public/Shape.js';
++
++export class BoxLabelHandler implements AttributeHandler {
++  public get name(): string { return 'box-label'; }
++  public handles(shape: ShapeView, attribute: string): boolean { return shape.type === 'box' && attribute === 'label'; }
++  public apply(context: AttributeContext, _attribute: string, value: AttributeValue): AttributeChange {
++    const part = context.document.getShape(`${context.target.id}-label`); const before = part.getAttribute('text');
++    part.set('text', value); const after = part.getAttribute('text');
++    return { before, after, message: `box#${context.target.id} label updated: ${JSON.stringify(after)}`,
++      undoMessage: `box#${context.target.id} label restored: ${JSON.stringify(before)}` };
++  }
++}
+diff --git a/src/plugins/shape-box/BoxPart.ts b/src/plugins/shape-box/BoxPart.ts
+new file mode 100644
+index 0000000..ea3d5ec
+--- /dev/null
++++ b/src/plugins/shape-box/BoxPart.ts
+@@ -0,0 +1,41 @@
++import type { AttributeValue, ShapeNode, ShapeView } from '../../core/public/Shape.js';
++import { ShapeValidation as V } from '../../core/public/ShapeValidation.js';
++
++/** Local template leaf; no dependency on the built-in shape package. */
++export class BoxPart implements ShapeNode {
++  private readonly values = new Map<string, AttributeValue>();
++  public constructor(private readonly idValue: string, private readonly typeValue: 'rect' | 'text',
++    attributes: readonly (readonly [string, AttributeValue])[]) {
++    V.id(idValue); for (const [name, value] of attributes) this.set(name, value);
++  }
++  public get id(): string { return this.idValue; }
++  public get type(): string { return this.typeValue; }
++  public get isContainer(): boolean { return false; }
++  public get children(): readonly ShapeNode[] { return Object.freeze([]); }
++  public get attributes(): readonly (readonly [string, AttributeValue])[] {
++    return Object.freeze([...this.values].map(entry => Object.freeze(entry)));
++  }
++  public getAttribute(name: string): AttributeValue | undefined { return this.values.get(name); }
++  public set(name: string, value: AttributeValue): void {
++    if (name === 'x' || name === 'y') this.values.set(name, V.number(value));
++    else if (name === 'stroke-width' || this.type === 'rect' && (name === 'width' || name === 'height')) this.values.set(name, V.nonnegative(value, name));
++    else if (name === 'fill' || name === 'stroke' || this.type === 'text' && name === 'text') this.values.set(name, V.text(value, name));
++    else throw new Error(`unknown attribute: ${name}`);
++  }
++  public view(): ShapeView { return Object.freeze({ id: this.id, type: this.type, isContainer: false, attributes: this.attributes, children: this.children }); }
++  public clone(): BoxPart { return new BoxPart(this.id, this.typeValue, this.attributes); }
++  public validateChildren(children: readonly ShapeNode[]): void { if (children.length !== 0) throw new Error('box part cannot contain children'); }
++  public withChildren(children: readonly ShapeNode[]): BoxPart { this.validateChildren(children); return this.clone(); }
++  public assertUngroup(): never { throw new Error(`not a container: ${this.id}`); }
++  public move(dx: number, dy: number): void {
++    const x = V.finite(Number(this.values.get('x')) + V.number(dx), 'x');
++    const y = V.finite(Number(this.values.get('y')) + V.number(dy), 'y');
++    this.values.set('x', x); this.values.set('y', y);
++  }
++  public scale(factor: number): void {
++    V.factor(factor);
++    const updates = ['x', 'y', ...(this.type === 'rect' ? ['width', 'height'] : [])].map(name =>
++      [name, V.finite(Number(this.values.get(name)) * factor, name)] as const);
++    for (const [name, value] of updates) this.values.set(name, value);
++  }
++}
+diff --git a/src/plugins/shape-box/BoxPlugin.ts b/src/plugins/shape-box/BoxPlugin.ts
+new file mode 100644
+index 0000000..eb5ce9f
+--- /dev/null
++++ b/src/plugins/shape-box/BoxPlugin.ts
+@@ -0,0 +1,13 @@
++import type { Plugin, PluginContext } from '../../core/public/Plugin.js';
++import { BoxProvider } from './BoxProvider.js';
++import { BoxFillHandler } from './BoxFillHandler.js';
++import { BoxLabelHandler } from './BoxLabelHandler.js';
++import { BoxTypeDecorator } from './BoxTypeDecorator.js';
++
++export default class BoxPlugin implements Plugin {
++  public activate(context: PluginContext): void {
++    context.registerShape(new BoxProvider());
++    context.registerAttribute(new BoxFillHandler()); context.registerAttribute(new BoxLabelHandler());
++    context.registerDecorator(new BoxTypeDecorator());
++  }
++}
+diff --git a/src/plugins/shape-box/BoxProvider.ts b/src/plugins/shape-box/BoxProvider.ts
+new file mode 100644
+index 0000000..6af79f1
+--- /dev/null
++++ b/src/plugins/shape-box/BoxProvider.ts
+@@ -0,0 +1,34 @@
++import type { AttributeValue, ShapeView } from '../../core/public/Shape.js';
++import type { ShapeProvider, ShapeInput, ShapeEncoding, ShapePresentation, ShapeOperation, ShapeFeedback } from '../../core/public/ShapeProvider.js';
++import { ShapeValidation as V } from '../../core/public/ShapeValidation.js';
++import { BoxShape } from './BoxShape.js';
++import { BoxPart } from './BoxPart.js';
++
++export class BoxProvider implements ShapeProvider {
++  public get name(): string { return 'box'; }
++  public get createSyntax(): string { return 'box <id> <x> <y> <w> <h> "label"'; }
++  public create(id: string, parameters: readonly AttributeValue[]): BoxShape {
++    if (parameters.length !== 5) throw new Error(`invalid arguments. usage: create ${this.createSyntax} [in <containerId>]`);
++    const x = V.number(parameters[0]!); const y = V.number(parameters[1]!);
++    const width = V.nonnegative(parameters[2]!, 'width'); const height = V.nonnegative(parameters[3]!, 'height');
++    const text = V.text(parameters[4]!, 'label');
++    return new BoxShape(id, [new BoxPart(`${id}-rect`, 'rect', [['x', x], ['y', y], ['width', width], ['height', height], ['fill', '#4a90d9']]),
++      new BoxPart(`${id}-label`, 'text', [['x', V.finite(x + 20, 'x')], ['y', V.finite(y + 35, 'y')], ['text', text]])]);
++  }
++  public read(input: ShapeInput): BoxShape {
++    if (input.text.trim().length !== 0) throw new Error('invalid svg: unexpected text in g');
++    const styles = input.attributes.filter(([name]) => name !== 'id' && name !== 'data-kind');
++    for (const [name] of styles) if (!['fill', 'stroke', 'stroke-width'].includes(name)) throw new Error(`unsupported svg attribute: ${name}`);
++    return new BoxShape(input.id, input.children, styles);
++  }
++  public write(shape: ShapeView): ShapeEncoding { return { tag: 'g', attributes: [['id', shape.id], ['data-kind', 'box'], ...shape.attributes] }; }
++  public present(shape: ShapeView): ShapePresentation {
++    const styles = shape.attributes.map(([name, value]) => `${name}=${value}`);
++    return { treeTitle: `g#${shape.id}`, treeDetails: styles.join(' '), showDetails: [`children=${shape.children.length}`, ...styles] };
++  }
++  public feedback(operation: ShapeOperation): ShapeFeedback | undefined {
++    if (operation.name !== 'create' || operation.after === undefined) return undefined;
++    const id = operation.after.id;
++    return { message: `box#${id} created (g#${id} + rect#${id}-rect + text#${id}-label)`, undoMessage: `box#${id} deleted` };
++  }
++}
+diff --git a/src/plugins/shape-box/BoxShape.ts b/src/plugins/shape-box/BoxShape.ts
+new file mode 100644
+index 0000000..ed5f92a
+--- /dev/null
++++ b/src/plugins/shape-box/BoxShape.ts
+@@ -0,0 +1,40 @@
++import type { AttributeValue, ShapeNode, ShapeView } from '../../core/public/Shape.js';
++import { ShapeValidation as V } from '../../core/public/ShapeValidation.js';
++
++export class BoxShape implements ShapeNode {
++  private readonly nodes: readonly ShapeNode[];
++  private readonly styles = new Map<string, AttributeValue>();
++  public constructor(private readonly idValue: string, children: readonly ShapeNode[],
++    styles: readonly (readonly [string, AttributeValue])[] = []) {
++    V.id(idValue); this.nodes = Object.freeze([...children]); this.validateChildren(children);
++    for (const [name, value] of styles) this.set(name, value);
++  }
++  public get id(): string { return this.idValue; }
++  public get type(): string { return 'box'; }
++  public get isContainer(): boolean { return true; }
++  public get children(): readonly ShapeNode[] { return this.nodes; }
++  public get attributes(): readonly (readonly [string, AttributeValue])[] { return Object.freeze([...this.styles].map(entry => Object.freeze(entry))); }
++  public getAttribute(name: string): AttributeValue | undefined { return this.styles.get(name); }
++  public set(name: string, value: AttributeValue): void {
++    if (name === 'fill' || name === 'stroke') this.styles.set(name, V.text(value, name));
++    else if (name === 'stroke-width') this.styles.set(name, V.nonnegative(value, name));
++    else throw new Error(`unknown attribute: ${name}`);
++  }
++  public view(): ShapeView { return Object.freeze({ id: this.id, type: this.type, isContainer: true,
++    attributes: this.attributes, children: Object.freeze(this.nodes.map(node => node.view())) }); }
++  public clone(): BoxShape { return new BoxShape(this.id, this.nodes.map(node => node.clone()), this.attributes); }
++  public withChildren(children: readonly ShapeNode[]): BoxShape { return new BoxShape(this.id, children, this.attributes); }
++  public validateChildren(children: readonly ShapeNode[]): void {
++    for (const [suffix, type] of [['rect', 'rect'], ['label', 'text']]) {
++      if (!children.some(child => child.id === `${this.id}-${suffix}` && child.type === type)) {
++        throw new Error(`invalid box: ${this.id} requires ${type}#${this.id}-${suffix}`);
++      }
++    }
++  }
++  public assertUngroup(): never { throw new Error(`cannot ungroup composite shape: ${this.id}`); }
++  public move(dx: number, dy: number): void { this.apply(child => child.move(dx, dy)); }
++  public scale(factor: number): void { this.apply(child => child.scale(factor)); }
++  private apply(operation: (child: ShapeNode) => void): void {
++    this.nodes.forEach(child => operation(child.clone())); this.nodes.forEach(operation);
++  }
++}
+diff --git a/src/plugins/shape-box/BoxTypeDecorator.ts b/src/plugins/shape-box/BoxTypeDecorator.ts
+new file mode 100644
+index 0000000..f09def7
+--- /dev/null
++++ b/src/plugins/shape-box/BoxTypeDecorator.ts
+@@ -0,0 +1,6 @@
++import type { TreeDecorator, TreeLine } from '../../core/public/TreeDecorator.js';
++
++export class BoxTypeDecorator implements TreeDecorator {
++  public get name(): string { return 'box-type-label'; }
++  public labels(line: TreeLine): readonly string[] { return line.shape?.type === 'box' ? ['(box)'] : []; }
++}
+diff --git a/src/plugins/shape-box/package.json b/src/plugins/shape-box/package.json
+new file mode 100644
+index 0000000..6134b21
+--- /dev/null
++++ b/src/plugins/shape-box/package.json
+@@ -0,0 +1,10 @@
++{
++  "name": "@svgframe/plugin-shape-box",
++  "type": "module",
++  "main": "./BoxPlugin.js",
++  "contributes": {
++    "shapes": ["box"],
++    "attributes": ["box-fill", "box-label"],
++    "decorators": ["box-type-label"]
++  }
++}
