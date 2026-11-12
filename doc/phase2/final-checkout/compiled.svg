@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <g id="n" data-kind="box">
+    <rect id="n-rect" x="130" y="120" width="160" height="60" fill="#f5a623"/>
+    <text id="n-label" x="150" y="155">最终验证</text>
+  </g>
+</svg>

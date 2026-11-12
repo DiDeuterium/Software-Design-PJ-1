@@ -2,15 +2,15 @@
 
 基线：251127e69abb2512dc787efe6a92dd30ab9514d4
 
-候选：cf0e544fc50d25560a1fc0734c259f715977c262
+候选：4408b4f9b7782dc9174b5df7d154f5e3506daf31
 
-源文件内容摘要：3dc31ec49454ecd06d91769da371082c501dbc2e6203299cdf2b707c1b66eecb
+源文件内容摘要：f2cdd329646deb99bd4fc81423a08d39b2c0e580f5f7088e4e989c7f9adb6dc8
 
 | 类别 | final 文件/行数/复杂度 | 候选文件/行数/复杂度 | 复杂度增量 |
 | --- | --- | --- | --- |
 | core | 56 / 2028 / 521 | 28 / 1165 / 382 | -139 |
-| host | 7 / 360 / 128 | 5 / 154 / 37 | -91 |
-| plugins | 0 / 0 / 0 | 128 / 2756 / 784 | 784 |
+| host | 7 / 360 / 128 | 6 / 234 / 84 | -44 |
+| plugins | 0 / 0 / 0 | 141 / 3017 / 921 | 921 |
 | vscode | 0 / 0 / 0 | 5 / 91 / 42 | 42 |
 
 ## 候选文件清单与职责
@@ -55,7 +55,7 @@
 | src/application/ports/SvgReadResult.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/application/session/EditorSession.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/application/session/EditorState.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
-| src/bootstrap/main.ts | host | 7 | 1 | 宿主装配、终端或 IO 适配 |
+| src/bootstrap/main.ts | host | 11 | 1 | 宿主装配、终端或 IO 适配 |
 | src/cli/CommandDispatcher.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/cli/Repl.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/cli/Token.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
@@ -104,9 +104,10 @@
 | src/domain/shapes/TreeAccess.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/domain/traversal/ShapeVisitor.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/host/Repl.ts | host | 57 | 11 | 宿主装配、终端或 IO 适配 |
-| src/host/Runtime.ts | host | 41 | 11 | 宿主装配、终端或 IO 适配 |
+| src/host/Runtime.ts | host | 45 | 14 | 宿主装配、终端或 IO 适配 |
 | src/host/filesystem/LocalDirectoryReader.ts | host | 10 | 4 | 宿主装配、终端或 IO 适配 |
 | src/host/filesystem/LocalFileStore.ts | host | 39 | 10 | 宿主装配、终端或 IO 适配 |
+| src/host/plugins/PluginLoader.ts | host | 72 | 44 | 默认图形/命令插件实现 |
 | src/infrastructure/filesystem/LocalFileStore.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/infrastructure/svg/FastXmlSvgCodec.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/infrastructure/svg/SvgElement.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
@@ -179,6 +180,19 @@
 | src/plugins/builtin/legacy/presentation/ShowFormatter.ts | plugins | 27 | 10 | 默认插件内保留的 Phase 1 模型、兼容行为及旧 API 实现 |
 | src/plugins/builtin/legacy/presentation/StyleFormatter.ts | plugins | 12 | 5 | 默认插件内保留的 Phase 1 模型、兼容行为及旧 API 实现 |
 | src/plugins/builtin/legacy/presentation/TreeFormatter.ts | plugins | 51 | 17 | 默认插件内保留的 Phase 1 模型、兼容行为及旧 API 实现 |
+| src/plugins/command-dir/DirCommand.ts | plugins | 24 | 16 | 默认图形/命令插件实现 |
+| src/plugins/command-dir/DirPlugin.ts | plugins | 6 | 1 | 默认图形/命令插件实现 |
+| src/plugins/command-stats/StatsCommand.ts | plugins | 24 | 12 | 默认图形/命令插件实现 |
+| src/plugins/command-stats/StatsPlugin.ts | plugins | 6 | 1 | 默认图形/命令插件实现 |
+| src/plugins/shape-box/BoxFillHandler.ts | plugins | 13 | 5 | 默认图形/命令插件实现 |
+| src/plugins/shape-box/BoxLabelHandler.ts | plugins | 13 | 4 | 默认图形/命令插件实现 |
+| src/plugins/shape-box/BoxPart.ts | plugins | 41 | 31 | 默认图形/命令插件实现 |
+| src/plugins/shape-box/BoxPlugin.ts | plugins | 13 | 1 | 默认图形/命令插件实现 |
+| src/plugins/shape-box/BoxProvider.ts | plugins | 34 | 16 | 默认图形/命令插件实现 |
+| src/plugins/shape-box/BoxShape.ts | plugins | 40 | 30 | 默认图形/命令插件实现 |
+| src/plugins/shape-box/BoxTypeDecorator.ts | plugins | 6 | 3 | 默认图形/命令插件实现 |
+| src/plugins/tree-star/ModifiedStarDecorator.ts | plugins | 35 | 16 | 默认图形/命令插件实现 |
+| src/plugins/tree-star/TreeStarPlugin.ts | plugins | 6 | 1 | 默认图形/命令插件实现 |
 | src/presentation/HelpFormatter.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/presentation/ShowFormatter.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |
 | src/presentation/StyleFormatter.ts | plugins | 2 | 0 | 旧路径兼容导出；不被新 CLI 内核导入 |

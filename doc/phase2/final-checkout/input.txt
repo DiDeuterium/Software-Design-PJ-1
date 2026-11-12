@@ -1,0 +1,15 @@
+help
+dir
+init
+create box n 120 100 160 60 "开始"
+set n label "最终验证"
+set n fill #f5a623
+move n 10 20
+undo
+redo
+stats
+tree
+save final.svg
+read final.svg
+stats
+tree

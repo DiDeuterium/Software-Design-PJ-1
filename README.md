@@ -2,7 +2,7 @@
 
 TypeScript 面向对象 SVG 编辑器。第二阶段步骤3已完成 CLI 插件框架迁移，默认保留六种图形、全部原命令和 SVG read/save。第一阶段课程场景、预览和干净检出记录保留；本轮新入口通过回归及字节兼容验证，后续双装配与正式插件仍待实现。
 
-最终设计文档见 [doc/README.md](doc/README.md)，行为约定见 [设计决策](doc/decisions.md)，课程要求见 [phase_cli_1.md](phase_cli_1.md)。
+第二阶段最终设计报告见 [doc/README.md](doc/README.md)，第一阶段行为约定见 [设计决策](doc/decisions.md) 和 [phase_cli_1.md](phase_cli_1.md)。
 
 ## 环境与安装
 
@@ -111,7 +111,7 @@ npm run build
 
 第二阶段当前完成 VS Code 扩展实践：源码与运行步骤见 [SVG Tools](extensions/svg-tools/README.md)，模式分析、复用评估和实际截图见 [实践记录](doc/phase2/vscode/README.md)。该扩展独立执行 npm ci、npm run check 及真实扩展宿主测试，不包含在根目录 CLI 的测试计数中。
 
-步骤2的 [契约与 ADR](doc/phase2/architecture/README.md) 已落地；步骤3完成 [框架迁移](doc/phase2/framework/README.md)，[指标](docs/metrics/README.md) 当前固定于代码提交cf0e544。步骤4完成 [双装配](doc/phase2/assembly/README.md)，步骤5新增 [stats/dir](doc/phase2/commands/README.md)，步骤6新增 [box](doc/phase2/box/README.md)，步骤7新增 [modified-star](doc/phase2/star/README.md)，步骤8完成 [统一验收与差异举证](doc/phase2/acceptance/README.md)。先 `npm run build`，再 `npm run cli -- --config plugins.config.json` 启用；不传配置保持原有能力。剩余步骤9为最终交付整理、指标、干净检出及标签收尾。
+步骤1–8的实现与 [统一验收/差异举证](doc/phase2/acceptance/README.md) 已完成。先 `npm run build`，再 `npm run cli -- --config plugins.config.json` 启用所有可选插件；不传配置保持原有能力。[最终报告](doc/README.md)、[完整历史指标](docs/metrics/report.md) 和 [干净检出结论](doc/phase2/final-verification.md) 已准备；指标固定于包含全部功能的4408b4f。第二阶段交付版本见 Git 标签 `p2`。
 
 ## 提交约定
 

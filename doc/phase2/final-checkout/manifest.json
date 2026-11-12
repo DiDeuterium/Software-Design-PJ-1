@@ -1,0 +1,10 @@
+{
+  "revision": "4408b4f9b7782dc9174b5df7d154f5e3506daf31",
+  "node": "v22.17.1",
+  "cleanBeforeAndAfter": true,
+  "sourceCompiledEqual": true,
+  "bundleVerified": true,
+  "inputSha256": "cb35efb717250425434958e08190b32667548404a60760df1b3013265611e025",
+  "stdoutSha256": "4aca6caf1cb8d505cf427b59eaf664be8f705e3b59ab7f9b03865ded0f1c68f2",
+  "svgSha256": "9b2936d4b313cceb8832c9fd7b61850a4386c93424b4f899b86e5e2f737bc039"
+}

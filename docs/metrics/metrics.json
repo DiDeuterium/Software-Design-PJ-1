@@ -3165,8 +3165,8 @@
     ]
   },
   "candidate": {
-    "revision": "cf0e544fc50d25560a1fc0734c259f715977c262",
-    "contentSha256": "3dc31ec49454ecd06d91769da371082c501dbc2e6203299cdf2b707c1b66eecb",
+    "revision": "4408b4f9b7782dc9174b5df7d154f5e3506daf31",
+    "contentSha256": "f2cdd329646deb99bd4fc81423a08d39b2c0e580f5f7088e4e989c7f9adb6dc8",
     "files": [
       {
         "path": "extensions/svg-tools/src/OutlineElement.ts",
@@ -3817,12 +3817,12 @@
         "path": "src/bootstrap/main.ts",
         "role": "host",
         "responsibility": "宿主装配、终端或 IO 适配",
-        "lines": 7,
-        "nonBlankLines": 6,
+        "lines": 11,
+        "nonBlankLines": 10,
         "complexity": 1,
         "functions": [
           {
-            "line": 5,
+            "line": 9,
             "name": "(anonymous)",
             "complexity": 1
           }
@@ -5462,24 +5462,14 @@
         "path": "src/host/Runtime.ts",
         "role": "host",
         "responsibility": "宿主装配、终端或 IO 适配",
-        "lines": 41,
-        "nonBlankLines": 39,
-        "complexity": 11,
+        "lines": 45,
+        "nonBlankLines": 43,
+        "complexity": 14,
         "functions": [
           {
-            "line": 26,
-            "name": "createRuntime",
-            "complexity": 7
-          },
-          {
             "line": 28,
-            "name": "(anonymous)",
-            "complexity": 1
-          },
-          {
-            "line": 29,
-            "name": "extensions",
-            "complexity": 1
+            "name": "createRuntime",
+            "complexity": 9
           },
           {
             "line": 30,
@@ -5487,7 +5477,22 @@
             "complexity": 1
           },
           {
+            "line": 31,
+            "name": "extensions",
+            "complexity": 1
+          },
+          {
+            "line": 32,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
             "line": 38,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 42,
             "name": "(anonymous)",
             "complexity": 1
           }
@@ -5506,7 +5511,8 @@
           "../core/public/Extensions.js",
           "../plugins/builtin/BuiltinPlugin.js",
           "./filesystem/LocalFileStore.js",
-          "./filesystem/LocalDirectoryReader.js"
+          "./filesystem/LocalDirectoryReader.js",
+          "./plugins/PluginLoader.js"
         ],
         "exports": [
           "RuntimeOptions"
@@ -5576,6 +5582,73 @@
         ],
         "exports": [
           "LocalFileStore"
+        ]
+      },
+      {
+        "path": "src/host/plugins/PluginLoader.ts",
+        "role": "host",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 72,
+        "nonBlankLines": 66,
+        "complexity": 44,
+        "functions": [
+          {
+            "line": 10,
+            "name": "object",
+            "complexity": 3
+          },
+          {
+            "line": 14,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 16,
+            "name": "activate",
+            "complexity": 3
+          },
+          {
+            "line": 21,
+            "name": "loadConfig",
+            "complexity": 7
+          },
+          {
+            "line": 26,
+            "name": "(anonymous)",
+            "complexity": 5
+          },
+          {
+            "line": 34,
+            "name": "load",
+            "complexity": 8
+          },
+          {
+            "line": 52,
+            "name": "manifest",
+            "complexity": 13
+          },
+          {
+            "line": 61,
+            "name": "(anonymous)",
+            "complexity": 3
+          },
+          {
+            "line": 62,
+            "name": "(anonymous)",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "node:fs/promises",
+          "node:module",
+          "node:path",
+          "node:url",
+          "../../core/public/Plugin.js",
+          "../../core/registry/PluginRegistry.js"
+        ],
+        "exports": [
+          "Entry",
+          "PluginLoader"
         ]
       },
       {
@@ -9302,6 +9375,665 @@
         ]
       },
       {
+        "path": "src/plugins/command-dir/DirCommand.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 24,
+        "nonBlankLines": 23,
+        "complexity": 16,
+        "functions": [
+          {
+            "line": 6,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 7,
+            "name": "name",
+            "complexity": 1
+          },
+          {
+            "line": 8,
+            "name": "syntax",
+            "complexity": 1
+          },
+          {
+            "line": 9,
+            "name": "help",
+            "complexity": 1
+          },
+          {
+            "line": 10,
+            "name": "run",
+            "complexity": 2
+          },
+          {
+            "line": 12,
+            "name": "(anonymous)",
+            "complexity": 3
+          },
+          {
+            "line": 17,
+            "name": "(anonymous)",
+            "complexity": 2
+          },
+          {
+            "line": 17,
+            "name": "(anonymous)",
+            "complexity": 4
+          },
+          {
+            "line": 21,
+            "name": "(anonymous)",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Command.js",
+          "../../core/public/Session.js",
+          "../../core/public/Plugin.js"
+        ],
+        "exports": [
+          "DirCommand"
+        ]
+      },
+      {
+        "path": "src/plugins/command-dir/DirPlugin.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 6,
+        "nonBlankLines": 5,
+        "complexity": 1,
+        "functions": [
+          {
+            "line": 5,
+            "name": "activate",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Plugin.js",
+          "./DirCommand.js"
+        ],
+        "exports": [
+          "DirPlugin"
+        ]
+      },
+      {
+        "path": "src/plugins/command-stats/StatsCommand.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 24,
+        "nonBlankLines": 23,
+        "complexity": 12,
+        "functions": [
+          {
+            "line": 6,
+            "name": "name",
+            "complexity": 1
+          },
+          {
+            "line": 7,
+            "name": "syntax",
+            "complexity": 1
+          },
+          {
+            "line": 8,
+            "name": "help",
+            "complexity": 1
+          },
+          {
+            "line": 9,
+            "name": "run",
+            "complexity": 2
+          },
+          {
+            "line": 11,
+            "name": "(anonymous)",
+            "complexity": 3
+          },
+          {
+            "line": 14,
+            "name": "visit",
+            "complexity": 3
+          },
+          {
+            "line": 20,
+            "name": "(anonymous)",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Command.js",
+          "../../core/public/Session.js",
+          "../../core/public/Shape.js"
+        ],
+        "exports": [
+          "StatsCommand"
+        ]
+      },
+      {
+        "path": "src/plugins/command-stats/StatsPlugin.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 6,
+        "nonBlankLines": 5,
+        "complexity": 1,
+        "functions": [
+          {
+            "line": 5,
+            "name": "activate",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Plugin.js",
+          "./StatsCommand.js"
+        ],
+        "exports": [
+          "StatsPlugin"
+        ]
+      },
+      {
+        "path": "src/plugins/shape-box/BoxFillHandler.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 13,
+        "nonBlankLines": 12,
+        "complexity": 5,
+        "functions": [
+          {
+            "line": 5,
+            "name": "name",
+            "complexity": 1
+          },
+          {
+            "line": 6,
+            "name": "handles",
+            "complexity": 2
+          },
+          {
+            "line": 7,
+            "name": "apply",
+            "complexity": 2
+          }
+        ],
+        "dependencies": [
+          "../../core/public/AttributeHandler.js",
+          "../../core/public/Shape.js"
+        ],
+        "exports": [
+          "BoxFillHandler"
+        ]
+      },
+      {
+        "path": "src/plugins/shape-box/BoxLabelHandler.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 13,
+        "nonBlankLines": 12,
+        "complexity": 4,
+        "functions": [
+          {
+            "line": 5,
+            "name": "name",
+            "complexity": 1
+          },
+          {
+            "line": 6,
+            "name": "handles",
+            "complexity": 2
+          },
+          {
+            "line": 7,
+            "name": "apply",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/AttributeHandler.js",
+          "../../core/public/Shape.js"
+        ],
+        "exports": [
+          "BoxLabelHandler"
+        ]
+      },
+      {
+        "path": "src/plugins/shape-box/BoxPart.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 41,
+        "nonBlankLines": 40,
+        "complexity": 31,
+        "functions": [
+          {
+            "line": 7,
+            "name": "(anonymous)",
+            "complexity": 2
+          },
+          {
+            "line": 11,
+            "name": "id",
+            "complexity": 1
+          },
+          {
+            "line": 12,
+            "name": "type",
+            "complexity": 1
+          },
+          {
+            "line": 13,
+            "name": "isContainer",
+            "complexity": 1
+          },
+          {
+            "line": 14,
+            "name": "children",
+            "complexity": 1
+          },
+          {
+            "line": 15,
+            "name": "attributes",
+            "complexity": 1
+          },
+          {
+            "line": 16,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 18,
+            "name": "getAttribute",
+            "complexity": 1
+          },
+          {
+            "line": 19,
+            "name": "set",
+            "complexity": 11
+          },
+          {
+            "line": 25,
+            "name": "view",
+            "complexity": 1
+          },
+          {
+            "line": 26,
+            "name": "clone",
+            "complexity": 1
+          },
+          {
+            "line": 27,
+            "name": "validateChildren",
+            "complexity": 2
+          },
+          {
+            "line": 28,
+            "name": "withChildren",
+            "complexity": 1
+          },
+          {
+            "line": 29,
+            "name": "assertUngroup",
+            "complexity": 1
+          },
+          {
+            "line": 30,
+            "name": "move",
+            "complexity": 1
+          },
+          {
+            "line": 35,
+            "name": "scale",
+            "complexity": 3
+          },
+          {
+            "line": 37,
+            "name": "(anonymous)",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Shape.js",
+          "../../core/public/ShapeValidation.js"
+        ],
+        "exports": [
+          "BoxPart"
+        ]
+      },
+      {
+        "path": "src/plugins/shape-box/BoxPlugin.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 13,
+        "nonBlankLines": 12,
+        "complexity": 1,
+        "functions": [
+          {
+            "line": 8,
+            "name": "activate",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Plugin.js",
+          "./BoxProvider.js",
+          "./BoxFillHandler.js",
+          "./BoxLabelHandler.js",
+          "./BoxTypeDecorator.js"
+        ],
+        "exports": [
+          "BoxPlugin"
+        ]
+      },
+      {
+        "path": "src/plugins/shape-box/BoxProvider.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 34,
+        "nonBlankLines": 33,
+        "complexity": 16,
+        "functions": [
+          {
+            "line": 8,
+            "name": "name",
+            "complexity": 1
+          },
+          {
+            "line": 9,
+            "name": "createSyntax",
+            "complexity": 1
+          },
+          {
+            "line": 10,
+            "name": "create",
+            "complexity": 2
+          },
+          {
+            "line": 18,
+            "name": "read",
+            "complexity": 4
+          },
+          {
+            "line": 20,
+            "name": "(anonymous)",
+            "complexity": 2
+          },
+          {
+            "line": 24,
+            "name": "write",
+            "complexity": 1
+          },
+          {
+            "line": 25,
+            "name": "present",
+            "complexity": 1
+          },
+          {
+            "line": 26,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 29,
+            "name": "feedback",
+            "complexity": 3
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Shape.js",
+          "../../core/public/ShapeProvider.js",
+          "../../core/public/ShapeValidation.js",
+          "./BoxShape.js",
+          "./BoxPart.js"
+        ],
+        "exports": [
+          "BoxProvider"
+        ]
+      },
+      {
+        "path": "src/plugins/shape-box/BoxShape.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 40,
+        "nonBlankLines": 39,
+        "complexity": 30,
+        "functions": [
+          {
+            "line": 7,
+            "name": "(anonymous)",
+            "complexity": 2
+          },
+          {
+            "line": 12,
+            "name": "id",
+            "complexity": 1
+          },
+          {
+            "line": 13,
+            "name": "type",
+            "complexity": 1
+          },
+          {
+            "line": 14,
+            "name": "isContainer",
+            "complexity": 1
+          },
+          {
+            "line": 15,
+            "name": "children",
+            "complexity": 1
+          },
+          {
+            "line": 16,
+            "name": "attributes",
+            "complexity": 1
+          },
+          {
+            "line": 16,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 17,
+            "name": "getAttribute",
+            "complexity": 1
+          },
+          {
+            "line": 18,
+            "name": "set",
+            "complexity": 4
+          },
+          {
+            "line": 23,
+            "name": "view",
+            "complexity": 1
+          },
+          {
+            "line": 24,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 25,
+            "name": "clone",
+            "complexity": 1
+          },
+          {
+            "line": 25,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 26,
+            "name": "withChildren",
+            "complexity": 1
+          },
+          {
+            "line": 27,
+            "name": "validateChildren",
+            "complexity": 3
+          },
+          {
+            "line": 29,
+            "name": "(anonymous)",
+            "complexity": 2
+          },
+          {
+            "line": 34,
+            "name": "assertUngroup",
+            "complexity": 1
+          },
+          {
+            "line": 35,
+            "name": "move",
+            "complexity": 1
+          },
+          {
+            "line": 35,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 36,
+            "name": "scale",
+            "complexity": 1
+          },
+          {
+            "line": 36,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 37,
+            "name": "apply",
+            "complexity": 1
+          },
+          {
+            "line": 38,
+            "name": "(anonymous)",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Shape.js",
+          "../../core/public/ShapeValidation.js"
+        ],
+        "exports": [
+          "BoxShape"
+        ]
+      },
+      {
+        "path": "src/plugins/shape-box/BoxTypeDecorator.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 6,
+        "nonBlankLines": 5,
+        "complexity": 3,
+        "functions": [
+          {
+            "line": 4,
+            "name": "name",
+            "complexity": 1
+          },
+          {
+            "line": 5,
+            "name": "labels",
+            "complexity": 2
+          }
+        ],
+        "dependencies": [
+          "../../core/public/TreeDecorator.js"
+        ],
+        "exports": [
+          "BoxTypeDecorator"
+        ]
+      },
+      {
+        "path": "src/plugins/tree-star/ModifiedStarDecorator.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 35,
+        "nonBlankLines": 31,
+        "complexity": 16,
+        "functions": [
+          {
+            "line": 9,
+            "name": "name",
+            "complexity": 1
+          },
+          {
+            "line": 11,
+            "name": "onCommit",
+            "complexity": 4
+          },
+          {
+            "line": 14,
+            "name": "visit",
+            "complexity": 1
+          },
+          {
+            "line": 21,
+            "name": "labels",
+            "complexity": 3
+          },
+          {
+            "line": 27,
+            "name": "ownContent",
+            "complexity": 1
+          },
+          {
+            "line": 28,
+            "name": "(anonymous)",
+            "complexity": 3
+          },
+          {
+            "line": 29,
+            "name": "(anonymous)",
+            "complexity": 1
+          },
+          {
+            "line": 31,
+            "name": "documentContent",
+            "complexity": 1
+          },
+          {
+            "line": 32,
+            "name": "subtree",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Document.js",
+          "../../core/public/Shape.js",
+          "../../core/public/TreeDecorator.js"
+        ],
+        "exports": [
+          "ModifiedStarDecorator"
+        ]
+      },
+      {
+        "path": "src/plugins/tree-star/TreeStarPlugin.ts",
+        "role": "plugins",
+        "responsibility": "默认图形/命令插件实现",
+        "lines": 6,
+        "nonBlankLines": 5,
+        "complexity": 1,
+        "functions": [
+          {
+            "line": 5,
+            "name": "activate",
+            "complexity": 1
+          }
+        ],
+        "dependencies": [
+          "../../core/public/Plugin.js",
+          "./ModifiedStarDecorator.js"
+        ],
+        "exports": [
+          "TreeStarPlugin"
+        ]
+      },
+      {
         "path": "src/presentation/HelpFormatter.ts",
         "role": "plugins",
         "responsibility": "旧路径兼容导出；不被新 CLI 内核导入",
@@ -9363,15 +10095,15 @@
       },
       {
         "role": "host",
-        "files": 5,
-        "lines": 154,
-        "complexity": 37
+        "files": 6,
+        "lines": 234,
+        "complexity": 84
       },
       {
         "role": "plugins",
-        "files": 128,
-        "lines": 2756,
-        "complexity": 784
+        "files": 141,
+        "lines": 3017,
+        "complexity": 921
       },
       {
         "role": "vscode",

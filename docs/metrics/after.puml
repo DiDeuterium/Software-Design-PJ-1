@@ -1,5 +1,5 @@
 @startuml
-title Generated CLI dependencies: cf0e544fc50d25560a1fc0734c259f715977c262
+title Generated CLI dependencies: 4408b4f9b7782dc9174b5df7d154f5e3506daf31
 component "src/application" as M0
 component "src/bootstrap" as M1
 component "src/cli" as M2
@@ -18,10 +18,15 @@ component "src/domain" as M14
 component "src/host/Repl.ts" as M15
 component "src/host/Runtime.ts" as M16
 component "src/host/filesystem" as M17
-component "src/infrastructure" as M18
-component "src/plugins/builtin" as M19
-component "src/presentation" as M20
-M0 --> M19
+component "src/host/plugins" as M18
+component "src/infrastructure" as M19
+component "src/plugins/builtin" as M20
+component "src/plugins/command-dir" as M21
+component "src/plugins/command-stats" as M22
+component "src/plugins/shape-box" as M23
+component "src/plugins/tree-star" as M24
+component "src/presentation" as M25
+M0 --> M20
 M1 --> M15
 M1 --> M16
 M10 --> M5
@@ -32,13 +37,14 @@ M12 --> M11
 M12 --> M5
 M12 --> M8
 M13 --> M8
-M14 --> M19
+M14 --> M20
 M15 --> M4
 M16 --> M10
 M16 --> M11
 M16 --> M12
 M16 --> M17
-M16 --> M19
+M16 --> M18
+M16 --> M20
 M16 --> M3
 M16 --> M4
 M16 --> M5
@@ -46,10 +52,16 @@ M16 --> M7
 M16 --> M8
 M16 --> M9
 M17 --> M8
-M18 --> M19
-M19 --> M8
-M2 --> M19
-M20 --> M19
+M18 --> M8
+M18 --> M9
+M19 --> M20
+M2 --> M20
+M20 --> M8
+M21 --> M8
+M22 --> M8
+M23 --> M8
+M24 --> M8
+M25 --> M20
 M3 --> M8
 M4 --> M8
 M5 --> M8
